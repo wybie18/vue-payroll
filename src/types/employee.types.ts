@@ -34,4 +34,5 @@ export interface ListEmployeesParams {
   search?: string
   officeId?: number | null
   status?: string | null
+  employmentStatus?: EmploymentStatus | null
 }

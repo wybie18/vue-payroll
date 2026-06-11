@@ -76,6 +76,7 @@ export async function listEmployees({
   search = '',
   officeId = null,
   status = null,
+  employmentStatus = null,
 }: ListEmployeesParams = {}): Promise<PaginatedResponse<Employee>> {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -98,6 +99,10 @@ export async function listEmployees({
 
   if (status) {
     query = query.eq('status', status)
+  }
+
+  if (employmentStatus) {
+    query = query.eq('employment_status', employmentStatus)
   }
 
   const { data, count, error } = await query

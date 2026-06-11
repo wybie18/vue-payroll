@@ -8,7 +8,7 @@ import {
   getAllEmployees,
   importEmployees,
 } from '@/services/employee.service'
-import type { Employee } from '@/types/employee.types'
+import type { Employee, EmploymentStatus } from '@/types/employee.types'
 import { toast } from 'vue-sonner'
 
 export function useEmployees() {
@@ -18,6 +18,7 @@ export function useEmployees() {
   const search = ref('')
   const officeId = ref<number | null>(null)
   const status = ref<string | null>(null)
+  const employmentStatus = ref<EmploymentStatus | null>(null)
   const page = ref(1)
   const pageSize = ref(10)
   const allEmployees = ref<Employee[]>([])
@@ -31,6 +32,7 @@ export function useEmployees() {
       search: search.value,
       officeId: officeId.value,
       status: status.value,
+      employmentStatus: employmentStatus.value,
     })
 
     if (error) {
@@ -60,7 +62,7 @@ export function useEmployees() {
   watch([page, pageSize], fetchEmployees)
 
   // Watch filters immediately, but reset page if not at 1 (which will trigger page watcher to fetch)
-  watch([officeId, status], () => {
+  watch([officeId, status, employmentStatus], () => {
     if (page.value === 1) {
       fetchEmployees()
     } else {
@@ -188,6 +190,7 @@ export function useEmployees() {
     search,
     officeId,
     status,
+    employmentStatus,
     page,
     pageSize,
     allEmployees,

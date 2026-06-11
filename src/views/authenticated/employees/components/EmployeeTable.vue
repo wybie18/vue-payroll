@@ -44,6 +44,7 @@ import Pagination from '@/components/ui/custom/data-table/Pagination.vue'
 import ViewOptions from '@/components/ui/custom/data-table/ViewOptions.vue'
 import { useOffices } from '@/composables/offices/useOffices'
 import { onMounted } from 'vue'
+import { EMPLOYMENT_STATUSES } from '@/types/employee.types'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 
@@ -57,6 +58,7 @@ interface Props {
   search?: string
   officeId?: number | null
   status?: string | null
+  employmentStatus?: string | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -67,6 +69,7 @@ const props = withDefaults(defineProps<Props>(), {
   search: '',
   officeId: null,
   status: null,
+  employmentStatus: null,
 })
 
 const emit = defineEmits<{
@@ -75,6 +78,7 @@ const emit = defineEmits<{
   'update:search': [search: string]
   'update:office-id': [officeId: number | null]
   'update:status': [status: string | null]
+  'update:employment-status': [employmentStatus: string | null]
   show: [row: TData]
   edit: [row: TData]
   delete: [row: TData]
@@ -95,7 +99,13 @@ const localStatus = computed({
   set: (val) => emit('update:status', val),
 })
 
+const localEmploymentStatus = computed({
+  get: () => props.employmentStatus ?? 'all',
+  set: (val) => emit('update:employment-status', val === 'all' ? null : val),
+})
+
 const officeOpen = ref(false)
+const employmentStatusOpen = ref(false)
 
 const { allOffices, fetchAllOffices } = useOffices()
 
@@ -232,6 +242,56 @@ const table = useVueTable({
           </PopoverContent>
         </Popover>
 
+        <!-- Employment Status Filter -->
+        <Popover v-model:open="employmentStatusOpen">
+          <PopoverTrigger as-child>
+            <Button
+              variant="outline"
+              role="combobox"
+              :aria-expanded="employmentStatusOpen"
+              class="h-8 justify-between min-w-50"
+              :class="!props.employmentStatus && 'text-muted-foreground'"
+            >
+              {{
+                props.employmentStatus ? props.employmentStatus : 'Filter by employment status...'
+              }}
+              <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent class="p-0 w-75">
+            <Command>
+              <CommandInput placeholder="Search status..." />
+              <CommandEmpty>No status found.</CommandEmpty>
+              <CommandList>
+                <CommandGroup>
+                  <CommandItem
+                    v-for="statusOpt in EMPLOYMENT_STATUSES"
+                    :key="statusOpt"
+                    :value="statusOpt"
+                    @select="
+                      () => {
+                        localEmploymentStatus =
+                          localEmploymentStatus === statusOpt ? 'all' : statusOpt
+                        employmentStatusOpen = false
+                      }
+                    "
+                  >
+                    <Check
+                      :class="
+                        cn(
+                          'mr-2 h-4 w-4',
+                          props.employmentStatus === statusOpt ? 'opacity-100' : 'opacity-0',
+                        )
+                      "
+                    />
+                    {{ statusOpt }}
+                  </CommandItem>
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
         <!-- Status Filter -->
         <Select v-model="localStatus">
           <SelectTrigger class="h-8 w-37.5">
@@ -245,7 +305,7 @@ const table = useVueTable({
 
         <!-- Clear Filters -->
         <Button
-          v-if="localSearch || localOfficeId || localStatus"
+          v-if="localSearch || localOfficeId || localStatus || props.employmentStatus"
           variant="ghost"
           class="h-8 px-2 lg:px-3"
           @click="
@@ -253,6 +313,7 @@ const table = useVueTable({
               localSearch = ''
               localOfficeId = null
               localStatus = null
+              localEmploymentStatus = 'all'
             }
           "
         >

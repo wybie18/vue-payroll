@@ -83,7 +83,7 @@ function handleShowEmployeePayroll(row: PayrollAdaBatchWithRelations) {
 
     <div class="flex flex-wrap items-end justify-between gap-2">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight">Linked Payroll Batches</h2>
+        <h2 class="text-2xl font-bold tracking-tight">{{ adaNumber }}</h2>
         <p class="text-muted-foreground">Manage payroll batches associated with this ADA.</p>
       </div>
       <Button class="space-x-1" @click="openCreate">

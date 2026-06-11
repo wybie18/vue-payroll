@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import Main from '@/components/layouts/Main.vue'
@@ -33,6 +34,7 @@ const {
   pageSize,
   officeId,
   status,
+  employmentStatus,
   addEmployee,
   editEmployee,
   removeEmployee,
@@ -132,6 +134,7 @@ async function handleImportSubmit(
       v-model:page="page"
       v-model:office-id="officeId"
       v-model:status="status"
+      v-model:employment-status="employmentStatus"
       @edit="openEdit"
       @delete="openDelete"
     />
