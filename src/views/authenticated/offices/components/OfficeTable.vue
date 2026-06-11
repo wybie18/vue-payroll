@@ -6,12 +6,8 @@ import {
   type ColumnDef,
   type SortingState,
   type VisibilityState,
-  type ColumnFiltersState,
   FlexRender,
   getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useVueTable,
@@ -67,7 +63,6 @@ const localSearch = computed({
 
 const sorting = ref<SortingState>([])
 const columnVisibility = useStorage<VisibilityState>('office-table-column-visibility', {})
-const columnFilters = ref<ColumnFiltersState>([])
 
 // ─── Derived: server-side page count ─────────────────────────────────────────
 
@@ -92,9 +87,6 @@ const table = useVueTable({
     get columnVisibility() {
       return columnVisibility.value
     },
-    get columnFilters() {
-      return columnFilters.value
-    },
     get pagination() {
       return { pageIndex: props.page - 1, pageSize: props.pageSize }
     },
@@ -118,16 +110,10 @@ const table = useVueTable({
     columnVisibility.value =
       typeof updater === 'function' ? updater(columnVisibility.value) : updater
   },
-  onColumnFiltersChange(updater) {
-    columnFilters.value = typeof updater === 'function' ? updater(columnFilters.value) : updater
-  },
 
   getCoreRowModel: getCoreRowModel(),
-  getFilteredRowModel: getFilteredRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
-  getFacetedRowModel: getFacetedRowModel(),
-  getFacetedUniqueValues: getFacetedUniqueValues(),
 
   meta: {
     onShow: (row: TData) => emit('show', row),

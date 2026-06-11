@@ -25,7 +25,7 @@ import { Switch } from '@/components/ui/switch'
 import { Check, ChevronsUpDown } from '@lucide/vue'
 
 import { cn } from '@/lib/utils'
-import type { Employee } from '@/types/employee.types'
+import { EMPLOYMENT_STATUSES, type Employee } from '@/types/employee.types'
 import { validateEmployeeForm } from '@/validators/employee.validators'
 import { useOffices } from '@/composables/offices/useOffices'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
@@ -72,19 +72,7 @@ const officeOpen = ref(false)
 const bankAccountOpen = ref(false)
 const employmentStatusOpen = ref(false)
 
-const employmentStatuses = [
-  'Permanent',
-  'Temporary',
-  'Coterminous',
-  'Elected',
-  'Casual',
-  'Job Order',
-  'Contract of Service',
-  'Consultant',
-  'Detailed',
-  'Probationary',
-  'Appointed',
-]
+const employmentStatuses = EMPLOYMENT_STATUSES
 
 const errors = ref({
   name: '',
@@ -111,9 +99,8 @@ watch(
   [() => props.open, () => props.row],
   async ([isOpen, val]) => {
     if (isOpen) {
-      // Fetch dropdown options. Ideally with a larger pageSize if there are many.
-      await fetchAllOffices()
-      await fetchAllAccountsWithBank()
+      // Fetch dropdown options in parallel
+      await Promise.all([fetchAllOffices(), fetchAllAccountsWithBank()])
       if (val) {
         name.value = val.name ?? ''
         officeId.value = val.office_id?.toString() ?? ''

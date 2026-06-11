@@ -54,18 +54,33 @@ export function useBankAccounts() {
     }
   }
 
+  // Re-fetch when page or pageSize changes
+  watch([page, pageSize], fetchBankAccounts)
+
+  // Watch bankId filter, reset page to 1
+  watch(bankId, () => {
+    if (page.value === 1) {
+      fetchBankAccounts()
+    } else {
+      page.value = 1
+    }
+  })
+
+  // Debounced search watcher
   watchDebounced(
     search,
     () => {
-      page.value = 1
-      fetchBankAccounts()
+      if (page.value === 1) {
+        fetchBankAccounts()
+      } else {
+        page.value = 1
+      }
     },
     { debounce: 300 },
   )
 
-  watch([page, pageSize, bankId], fetchBankAccounts)
-
-  Promise.all([fetchBankAccounts()])
+  // Initial load
+  fetchBankAccounts()
 
   async function addBankAccount(
     bank_id: number,

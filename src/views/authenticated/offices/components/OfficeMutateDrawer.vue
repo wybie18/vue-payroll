@@ -30,7 +30,6 @@ const emit = defineEmits<{
 }>()
 
 // ─── Form state ───────────────────────────────────────────────────────────────
-const selectedOfficeId = ref<string>('')
 const officeCode = ref('')
 const officeName = ref('')
 const abbreviation = ref('')

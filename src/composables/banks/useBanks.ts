@@ -34,18 +34,23 @@ export function useBanks() {
     isLoading.value = false
   }
 
+  // Re-fetch when page or pageSize changes
+  watch([page, pageSize], fetchBanks)
+
   watchDebounced(
     search,
     () => {
-      page.value = 1
-      fetchBanks()
+      if (page.value === 1) {
+        fetchBanks()
+      } else {
+        page.value = 1
+      }
     },
     { debounce: 300 },
   )
 
-  watch([page, pageSize], fetchBanks)
-
-  Promise.all([fetchBanks()])
+  // Initial load
+  fetchBanks()
 
   async function addBank(
     bank_name: string,

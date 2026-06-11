@@ -14,7 +14,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useOfficeDialogs } from '@/composables/offices/useOfficeDialogs'
 import { useOffices } from '@/composables/offices/useOffices'
 import type { Office } from '@/types/office.types'
@@ -23,8 +22,6 @@ import OfficeDeleteDialog from './components/OfficeDeleteDialog.vue'
 import OfficeMutateDrawer from './components/OfficeMutateDrawer.vue'
 import OfficeImportDrawer from './components/OfficeImportDrawer.vue'
 import OfficeTable from './components/OfficeTable.vue'
-
-const authStore = useAuthStore()
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 

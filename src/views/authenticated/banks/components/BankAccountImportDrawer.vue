@@ -17,6 +17,7 @@ import FileDropzone from '@/components/ui/custom/FileDropzone.vue'
 import { useBanks } from '@/composables/banks/useBanks'
 import Papa from 'papaparse'
 import { Separator } from '@/components/ui/separator'
+import { FUND_SOURCES, type FundSourceValue } from '@/types/bank.types'
 
 const props = defineProps<{
   open: boolean
@@ -28,7 +29,7 @@ const emit = defineEmits<{
     payload: {
       bank_id: number
       account_number: string
-      fund_source: 'EE' | 'GF' | 'SH'
+      fund_source: FundSourceValue
     }[],
   ]
 }>()
@@ -47,7 +48,7 @@ interface ParsedRow {
   bank_id: number
   bank_abbreviation: string
   account_number: string
-  fund_source: 'EE' | 'GF' | 'SH'
+  fund_source: FundSourceValue
 }
 
 const parsedRows = ref<ParsedRow[]>([])
@@ -122,9 +123,10 @@ const handleParseContent = (content: string) => {
       return
     }
 
-    if (fundSourceInput !== 'EE' && fundSourceInput !== 'GF' && fundSourceInput !== 'SH') {
+    const matchedSource = FUND_SOURCES.find((f) => f.value === fundSourceInput)
+    if (!matchedSource) {
       tempErrors.push(
-        `Row ${index + 1}: Invalid Fund Source "${fundSourceInput}". Must be EE, GF, or SH`,
+        `Row ${index + 1}: Invalid Fund Source "${fundSourceInput}". Must be one of: ${FUND_SOURCES.map((f) => f.value).join(', ')}`,
       )
       return
     }
@@ -146,7 +148,7 @@ const handleParseContent = (content: string) => {
       bank_id: bank.bank_id,
       bank_abbreviation: bank.bank_abbreviation || bank.bank_name,
       account_number: accountNumber,
-      fund_source: fundSourceInput as 'EE' | 'GF' | 'SH',
+      fund_source: matchedSource.value,
     })
   })
 
@@ -242,8 +244,7 @@ const close = () => {
               LBP, 0987654321, GF
             </code>
             <p class="text-[10px] text-muted-foreground mt-2">
-              * Bank abbreviation must match an existing bank in the system. Fund source must be EE,
-              GF, or SH.
+              * Bank abbreviation must match an existing bank in the system. Fund source must be one of: EE, GF, SH, TF, or PO.
             </p>
           </div>
         </div>

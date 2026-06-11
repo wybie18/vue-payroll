@@ -60,7 +60,7 @@ async function handleDelete(account: BankAccount) {
 }
 
 async function handleImportSubmit(
-  payload: { bank_id: number; account_number: string; fund_source: 'EE' | 'GF' | 'SH' }[],
+  payload: { bank_id: number; account_number: string; fund_source: BankAccount['fund_source'] }[],
 ) {
   await bulkImportBankAccounts(payload)
 }

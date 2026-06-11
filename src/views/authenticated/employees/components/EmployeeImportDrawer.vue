@@ -17,22 +17,10 @@ import FileDropzone from '@/components/ui/custom/FileDropzone.vue'
 import { useOffices } from '@/composables/offices/useOffices'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
 import Papa from 'papaparse'
-import type { Employee } from '@/types/employee.types'
+import { EMPLOYMENT_STATUSES, type Employee } from '@/types/employee.types'
 import { Separator } from '@/components/ui/separator'
 
-const VALID_EMPLOYMENT_STATUSES = [
-  'Permanent',
-  'Temporary',
-  'Coterminous',
-  'Elected',
-  'Casual',
-  'Job Order',
-  'Contract of Service',
-  'Consultant',
-  'Detailed',
-  'Probationary',
-  'Appointed',
-] as const
+const VALID_EMPLOYMENT_STATUSES = EMPLOYMENT_STATUSES
 
 const props = defineProps<{
   open: boolean
@@ -47,8 +35,7 @@ const { allOffices, fetchAllOffices } = useOffices()
 const { allAccountsWithBank, fetchAllAccountsWithBank } = useBankAccounts()
 
 onMounted(async () => {
-  await fetchAllOffices()
-  await fetchAllAccountsWithBank()
+  await Promise.all([fetchAllOffices(), fetchAllAccountsWithBank()])
 })
 
 const activeTab = ref('upload')

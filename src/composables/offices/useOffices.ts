@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { listOffices, createOffice, updateOffice, deleteOffice, getAllOffices, importOffices } from '@/services/office.service'
-import type { Office, ListOfficesParams } from '@/types/office.types'
+import type { Office } from '@/types/office.types'
 import { toast } from 'vue-sonner'
 
 /**
@@ -58,21 +58,24 @@ export function useOffices() {
     }
   }
 
+  // Re-fetch when page or pageSize changes
+  watch([page, pageSize], fetchOffices)
+
   // Debounce search and reset to page 1 on each new query
   watchDebounced(
     search,
     () => {
-      page.value = 1
-      fetchOffices()
+      if (page.value === 1) {
+        fetchOffices()
+      } else {
+        page.value = 1
+      }
     },
     { debounce: 300 },
   )
 
-  // Re-fetch when page or pageSize changes
-  watch([page, pageSize], fetchOffices)
-
   // Initial load
-  Promise.all([fetchOffices()])
+  fetchOffices()
 
   // ─── CRUD handlers ──────────────────────────────────────────────────────────
 

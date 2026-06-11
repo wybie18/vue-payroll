@@ -1,3 +1,19 @@
+export const EMPLOYMENT_STATUSES = [
+  'Permanent',
+  'Temporary',
+  'Coterminous',
+  'Elected',
+  'Casual',
+  'Job Order',
+  'Contract of Service',
+  'Consultant',
+  'Detailed',
+  'Probationary',
+  'Appointed',
+] as const
+
+export type EmploymentStatus = (typeof EMPLOYMENT_STATUSES)[number]
+
 export interface Employee {
   id: number
   name: string
@@ -7,18 +23,7 @@ export interface Employee {
   status: string
   employee_no: string
   eenggas_no: string
-  employment_status:
-    | 'Permanent'
-    | 'Temporary'
-    | 'Coterminous'
-    | 'Elected'
-    | 'Casual'
-    | 'Job Order'
-    | 'Contract of Service'
-    | 'Consultant'
-    | 'Detailed'
-    | 'Probationary'
-    | 'Appointed'
+  employment_status: EmploymentStatus
   created_at: string
   updated_at: string
 }

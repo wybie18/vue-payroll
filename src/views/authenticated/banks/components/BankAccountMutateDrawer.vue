@@ -23,7 +23,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import type { BankAccount } from '@/types/bank.types'
+import { FUND_SOURCES, type BankAccount } from '@/types/bank.types'
 import { validateBankAccountForm } from '@/validators/bank.validators'
 import { useBanks } from '@/composables/banks/useBanks'
 
@@ -202,13 +202,7 @@ function close() {
                 <span class="truncate">
                   {{
                     fundSource
-                      ? [
-                          { value: 'EE', label: 'Economic Enterprise' },
-                          { value: 'GF', label: 'General Fund' },
-                          { value: 'SH', label: 'Slaughter House' },
-                          { value: 'TF', label: 'Trust Fund Proper' },
-                          { value: 'PO', label: 'Peace and Order' },
-                        ].find((f) => f.value === fundSource)?.label
+                      ? FUND_SOURCES.find((f) => f.value === fundSource)?.label
                       : 'Select fund source...'
                   }}
                 </span>
@@ -222,13 +216,7 @@ function close() {
                 <CommandList>
                   <CommandGroup>
                     <CommandItem
-                      v-for="source in [
-                        { value: 'EE', label: 'Economic Enterprise' },
-                        { value: 'GF', label: 'General Fund' },
-                        { value: 'SH', label: 'Slaughter House' },
-                        { value: 'TF', label: 'Trust Fund Proper' },
-                        { value: 'PO', label: 'Peace and Order' },
-                      ]"
+                      v-for="source in FUND_SOURCES"
                       :key="source.value"
                       :value="source.label"
                       @select="

@@ -6,11 +6,21 @@ export interface Bank {
   address: string | null
 }
 
+export const FUND_SOURCES = [
+  { value: 'EE', label: 'Economic Enterprise' },
+  { value: 'GF', label: 'General Fund' },
+  { value: 'SH', label: 'Slaughter House' },
+  { value: 'TF', label: 'Trust Fund Proper' },
+  { value: 'PO', label: 'Peace and Order' },
+] as const
+
+export type FundSourceValue = (typeof FUND_SOURCES)[number]['value']
+
 export interface BankAccount {
   bank_account_id: number
   bank_id: number
   account_number: string
-  fund_source: 'EE' | 'GF' | 'SH' | 'TF' | 'PO'
+  fund_source: FundSourceValue
 }
 
 export interface BankWithAccounts extends Bank {

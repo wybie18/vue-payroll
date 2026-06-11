@@ -18,7 +18,6 @@ export function useEmployees() {
   const search = ref('')
   const officeId = ref<number | null>(null)
   const status = ref<string | null>(null)
-  const batchId = ref<number | null>(null)
   const page = ref(1)
   const pageSize = ref(10)
   const allEmployees = ref<Employee[]>([])
@@ -57,18 +56,33 @@ export function useEmployees() {
     }
   }
 
+  // Immediate watch for page & page size
+  watch([page, pageSize], fetchEmployees)
+
+  // Watch filters immediately, but reset page if not at 1 (which will trigger page watcher to fetch)
+  watch([officeId, status], () => {
+    if (page.value === 1) {
+      fetchEmployees()
+    } else {
+      page.value = 1
+    }
+  })
+
+  // Debounced watch for search input, reset page if not at 1
   watchDebounced(
     search,
     () => {
-      page.value = 1
-      fetchEmployees()
+      if (page.value === 1) {
+        fetchEmployees()
+      } else {
+        page.value = 1
+      }
     },
     { debounce: 300 },
   )
 
-  watch([page, pageSize, officeId, status, batchId], fetchEmployees)
-
-  Promise.all([fetchEmployees()])
+  // Initial load
+  fetchEmployees()
 
   async function addEmployee(
     name: string,
@@ -174,7 +188,6 @@ export function useEmployees() {
     search,
     officeId,
     status,
-    batchId,
     page,
     pageSize,
     allEmployees,

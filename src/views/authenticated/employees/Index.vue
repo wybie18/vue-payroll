@@ -33,7 +33,6 @@ const {
   pageSize,
   officeId,
   status,
-  batchId,
   addEmployee,
   editEmployee,
   removeEmployee,
@@ -133,7 +132,6 @@ async function handleImportSubmit(
       v-model:page="page"
       v-model:office-id="officeId"
       v-model:status="status"
-      v-model:batch-id="batchId"
       @edit="openEdit"
       @delete="openDelete"
     />
