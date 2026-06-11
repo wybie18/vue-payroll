@@ -2,6 +2,10 @@ import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 import { guestRoutes } from './guest'
 import { authRoutes } from './auth'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+NProgress.configure({ showSpinner: false })
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +26,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from) => {
+  NProgress.start()
   const isInvite = window.location.hash.includes('type=invite') || to.hash.includes('type=invite')
 
   const authStore = useAuthStore()
@@ -52,6 +57,10 @@ router.beforeEach(async (to, from) => {
   }
 
   return true
+})
+
+router.afterEach(() => {
+  NProgress.done()
 })
 
 export default router
