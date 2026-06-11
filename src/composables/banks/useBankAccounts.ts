@@ -8,7 +8,7 @@ import {
   getAllBankAccountWithBank,
   importBankAccounts,
 } from '@/services/bank.service'
-import type { AccountWithBank } from '@/types/bank.types'
+import type { AccountWithBank, BankAccount } from '@/types/bank.types'
 import { toast } from 'vue-sonner'
 
 export function useBankAccounts() {
@@ -70,7 +70,7 @@ export function useBankAccounts() {
   async function addBankAccount(
     bank_id: number,
     account_number: string,
-    fund_source: 'EE' | 'GF' | 'SH',
+    fund_source: BankAccount['fund_source'],
   ) {
     const { error } = await createBankAccount({
       bank_id,
@@ -93,7 +93,7 @@ export function useBankAccounts() {
     bank_account_id: number,
     bank_id: number,
     account_number: string,
-    fund_source: 'EE' | 'GF' | 'SH',
+    fund_source: BankAccount['fund_source'],
   ) {
     const { error } = await updateBankAccount(bank_account_id, {
       bank_id,
@@ -125,7 +125,7 @@ export function useBankAccounts() {
   }
 
   async function bulkImportBankAccounts(
-    payload: { bank_id: number; account_number: string; fund_source: 'EE' | 'GF' | 'SH' }[],
+    payload: { bank_id: number; account_number: string; fund_source: BankAccount['fund_source'] }[],
   ) {
     isLoading.value = true
     const { error } = await importBankAccounts(payload)

@@ -10,7 +10,7 @@ export interface BankAccount {
   bank_account_id: number
   bank_id: number
   account_number: string
-  fund_source: 'EE' | 'GF' | 'SH'
+  fund_source: 'EE' | 'GF' | 'SH' | 'TF' | 'PO'
 }
 
 export interface BankWithAccounts extends Bank {

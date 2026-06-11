@@ -23,7 +23,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import type { BankAccount, Bank } from '@/types/bank.types'
+import type { BankAccount } from '@/types/bank.types'
 import { validateBankAccountForm } from '@/validators/bank.validators'
 import { useBanks } from '@/composables/banks/useBanks'
 
@@ -206,6 +206,8 @@ function close() {
                           { value: 'EE', label: 'Economic Enterprise' },
                           { value: 'GF', label: 'General Fund' },
                           { value: 'SH', label: 'Slaughter House' },
+                          { value: 'TF', label: 'Trust Fund Proper' },
+                          { value: 'PO', label: 'Peace and Order' },
                         ].find((f) => f.value === fundSource)?.label
                       : 'Select fund source...'
                   }}
@@ -224,6 +226,8 @@ function close() {
                         { value: 'EE', label: 'Economic Enterprise' },
                         { value: 'GF', label: 'General Fund' },
                         { value: 'SH', label: 'Slaughter House' },
+                        { value: 'TF', label: 'Trust Fund Proper' },
+                        { value: 'PO', label: 'Peace and Order' },
                       ]"
                       :key="source.value"
                       :value="source.label"
