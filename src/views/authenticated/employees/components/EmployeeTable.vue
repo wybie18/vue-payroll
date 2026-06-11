@@ -200,11 +200,18 @@ const table = useVueTable({
               class="h-8 justify-between min-w-50"
               :class="!localOfficeId && 'text-muted-foreground'"
             >
-              {{
-                localOfficeId
-                  ? `${allOffices.find((o) => o.office_id === localOfficeId)?.office_name} ${allOffices.find((o) => o.office_id === localOfficeId)?.office_code ? `(${allOffices.find((o) => o.office_id === localOfficeId)?.office_code})` : ''}`
-                  : 'Filter by office...'
-              }}
+              <span class="truncate">
+                {{
+                  localOfficeId
+                    ? (() => {
+                        const office = allOffices.find((o) => o.office_id === localOfficeId)
+                        return office
+                          ? `${office.abbreviation} ${office.office_code ? `(${office.office_code})` : ''}`
+                          : 'Unknown'
+                      })()
+                    : 'Filter by office...'
+                }}
+              </span>
               <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -233,7 +240,7 @@ const table = useVueTable({
                         )
                       "
                     />
-                    {{ office.office_name }}
+                    {{ office.abbreviation }}
                     {{ office.office_code ? `(${office.office_code})` : '' }}
                   </CommandItem>
                 </CommandGroup>
