@@ -41,12 +41,7 @@ export function useEmployeePayrolls(batchId: Ref<number | null>) {
     isLoading.value = false
   }
 
-  watch([page, pageSize, batchId], fetchEmployeePayrolls)
-
-  // Initial fetch
-  if (batchId.value) {
-    Promise.all([fetchEmployeePayrolls()])
-  }
+  watch([page, pageSize, batchId], fetchEmployeePayrolls, { immediate: true })
 
   async function addEmployeePayroll(
     employee_id: number,

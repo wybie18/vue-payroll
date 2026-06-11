@@ -1,5 +1,4 @@
 import { ref, watch } from 'vue'
-import { watchDebounced } from '@vueuse/core'
 import {
   listPayrollPeriods,
   createPayrollPeriod,
@@ -43,17 +42,20 @@ export function usePayrollPeriods() {
     isLoading.value = false
   }
 
-  // When filters change, reset to page 1
-  watch([startDate, endDate], () => {
-    page.value = 1
-    fetchPayrollPeriods()
-  })
-
   // Watch pagination parameters
   watch([page, pageSize], fetchPayrollPeriods)
 
+  // When filters change, reset to page 1 (if not already 1)
+  watch([startDate, endDate], () => {
+    if (page.value === 1) {
+      fetchPayrollPeriods()
+    } else {
+      page.value = 1
+    }
+  })
+
   // Initial fetch
-  Promise.all([fetchPayrollPeriods()])
+  fetchPayrollPeriods()
 
   async function addPayrollPeriod(cutoff_start: string, cutoff_end: string) {
     const { error } = await createPayrollPeriod({ cutoff_start, cutoff_end })

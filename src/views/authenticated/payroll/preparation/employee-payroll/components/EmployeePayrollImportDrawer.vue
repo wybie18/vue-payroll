@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import {
   Sheet,
   SheetContent,
@@ -36,10 +36,6 @@ const emit = defineEmits<{
 }>()
 
 const { allEmployees, fetchAllEmployees } = useEmployees()
-
-onMounted(async () => {
-  await fetchAllEmployees()
-})
 
 const activeTab = ref('upload')
 const pastedText = ref('')
@@ -180,7 +176,9 @@ watch(activeTab, () => {
 watch(
   () => props.open,
   (isOpen) => {
-    if (!isOpen) {
+    if (isOpen) {
+      fetchAllEmployees()
+    } else {
       pastedText.value = ''
       parsedRows.value = []
       validationErrors.value = []

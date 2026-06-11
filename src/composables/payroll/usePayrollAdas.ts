@@ -46,14 +46,14 @@ export function usePayrollAdas() {
 
   // Reset page when any filter changes
   watch([payroll_period_id, bank_account_id, status], () => {
-    page.value = 1
-    fetchPayrollAdas()
+    if (page.value === 1) {
+      fetchPayrollAdas()
+    } else {
+      page.value = 1
+    }
   })
 
-  watch([page, pageSize], fetchPayrollAdas)
-
-  // Initial fetch
-  Promise.all([fetchPayrollAdas()])
+  watch([page, pageSize], fetchPayrollAdas, { immediate: true })
 
   async function addPayrollAda(
     payrollPeriodId: number,

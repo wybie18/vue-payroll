@@ -48,14 +48,14 @@ export function usePayrollBatches() {
 
   // Reset page when any filter changes
   watch([payroll_period_id, office_id, bank_account_id, status], () => {
-    page.value = 1
-    fetchPayrollBatches()
+    if (page.value === 1) {
+      fetchPayrollBatches()
+    } else {
+      page.value = 1
+    }
   })
 
-  watch([page, pageSize], fetchPayrollBatches)
-
-  // Initial fetch
-  Promise.all([fetchPayrollBatches()])
+  watch([page, pageSize], fetchPayrollBatches, { immediate: true })
 
   async function addPayrollBatch(
     periodId: number,

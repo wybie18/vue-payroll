@@ -46,8 +46,11 @@ export function usePayrollAdaBatches(adaId: Ref<number | null>) {
 
   // Reset page when ADA ID changes
   watch(adaId, () => {
-    page.value = 1
-    fetchAdaBatches()
+    if (page.value === 1) {
+      fetchAdaBatches()
+    } else {
+      page.value = 1
+    }
   }, { immediate: true })
 
   // Refetch when page or pageSize changes

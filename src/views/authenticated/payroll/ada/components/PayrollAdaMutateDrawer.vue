@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import {
   Sheet,
   SheetContent,
@@ -65,10 +65,6 @@ const emit = defineEmits<{
 const { allAccountsWithBank, fetchAllAccountsWithBank } = useBankAccounts()
 const { payrollPeriods, fetchPayrollPeriods } = usePayrollPeriods()
 
-onMounted(async () => {
-  await Promise.all([fetchAllAccountsWithBank(), fetchPayrollPeriods()])
-})
-
 const form = ref({
   payroll_period_id: null as number | null,
   bank_account_id: null as number | null,
@@ -101,39 +97,37 @@ const isEdit = ref(false)
 const openPeriodPopover = ref(false)
 const openBankPopover = ref(false)
 
-watch(
-  [() => props.open, () => props.row],
-  ([isOpen, val]) => {
-    if (isOpen) {
-      if (props.row) {
-        isEdit.value = true
-        form.value = {
-          payroll_period_id: props.row.payroll_period_id,
-          bank_account_id: props.row.bank_account_id,
-          ada_date: props.row.ada_date,
-          status: props.row.status,
-          compensation_type: props.row.compensation_type || '',
-        }
-      } else {
-        isEdit.value = false
-        form.value = {
-          payroll_period_id: null,
-          bank_account_id: null,
-          ada_date: '',
-          status: 'Prepared',
-          compensation_type: '',
-        }
+watch([() => props.open, () => props.row], ([isOpen]) => {
+  if (isOpen) {
+    Promise.all([fetchAllAccountsWithBank(), fetchPayrollPeriods()])
+    if (props.row) {
+      isEdit.value = true
+      form.value = {
+        payroll_period_id: props.row.payroll_period_id,
+        bank_account_id: props.row.bank_account_id,
+        ada_date: props.row.ada_date,
+        status: props.row.status,
+        compensation_type: props.row.compensation_type || '',
       }
-      errors.value = {
-        payroll_period_id: '',
-        bank_account_id: '',
-        ada_date: '',
-        status: '',
+    } else {
+      isEdit.value = false
+      form.value = {
+        payroll_period_id: null,
+        bank_account_id: null,
+        ada_date: todayString(),
+        status: 'Prepared',
         compensation_type: '',
       }
     }
-  },
-)
+    errors.value = {
+      payroll_period_id: '',
+      bank_account_id: '',
+      ada_date: '',
+      status: '',
+      compensation_type: '',
+    }
+  }
+})
 
 const handleSubmit = () => {
   const validation = validatePayrollAdaForm(
@@ -328,7 +322,9 @@ const handleSubmit = () => {
 
         <!-- Compensation Type -->
         <div class="grid gap-2">
-          <Label for="compensation-type">Compensation Type <span class="text-destructive">*</span></Label>
+          <Label for="compensation-type"
+            >Compensation Type <span class="text-destructive">*</span></Label
+          >
           <Popover v-model:open="compensationTypeOpen">
             <PopoverTrigger as-child>
               <Button
@@ -341,7 +337,8 @@ const handleSubmit = () => {
               >
                 {{
                   form.compensation_type
-                    ? compensationTypes.find((t) => t.value === form.compensation_type)?.label || 'Select type...'
+                    ? compensationTypes.find((t) => t.value === form.compensation_type)?.label ||
+                      'Select type...'
                     : 'Select compensation type...'
                 }}
                 <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -359,7 +356,8 @@ const handleSubmit = () => {
                       :value="typeOption.label"
                       @select="
                         () => {
-                          form.compensation_type = form.compensation_type === typeOption.value ? '' : typeOption.value
+                          form.compensation_type =
+                            form.compensation_type === typeOption.value ? '' : typeOption.value
                           compensationTypeOpen = false
                         }
                       "
@@ -368,7 +366,9 @@ const handleSubmit = () => {
                         :class="
                           cn(
                             'mr-2 h-4 w-4',
-                            form.compensation_type === typeOption.value ? 'opacity-100' : 'opacity-0',
+                            form.compensation_type === typeOption.value
+                              ? 'opacity-100'
+                              : 'opacity-0',
                           )
                         "
                       />
@@ -379,7 +379,9 @@ const handleSubmit = () => {
               </Command>
             </PopoverContent>
           </Popover>
-          <span v-if="errors.compensation_type" class="text-sm text-destructive">{{ errors.compensation_type }}</span>
+          <span v-if="errors.compensation_type" class="text-sm text-destructive">{{
+            errors.compensation_type
+          }}</span>
         </div>
 
         <!-- Status -->
