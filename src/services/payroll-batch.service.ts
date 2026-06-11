@@ -94,6 +94,7 @@ export async function listPayrollBatches({
   office_id = null,
   bank_account_id = null,
   status = null,
+  search = '',
 }: ListPayrollBatchesParams = {}): Promise<PaginatedResponse<PayrollBatchWithRelations>> {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -113,6 +114,7 @@ export async function listPayrollBatches({
   if (office_id) query = query.eq('office_id', office_id)
   if (bank_account_id) query = query.eq('bank_account_id', bank_account_id)
   if (status) query = query.eq('status', status)
+  if (search?.trim()) query = query.ilike('batch_code', `%${search.trim()}%`)
 
   const { data, count, error } = await query
 

@@ -1,4 +1,5 @@
 import { ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import {
   listPayrollBatches,
   createPayrollBatch,
@@ -17,6 +18,7 @@ export function usePayrollBatches() {
   const office_id = ref<number | null>(null)
   const bank_account_id = ref<number | null>(null)
   const status = ref<string | null>(null)
+  const search = ref('')
 
   const page = ref(1)
   const pageSize = ref(10)
@@ -31,6 +33,7 @@ export function usePayrollBatches() {
       office_id: office_id.value,
       bank_account_id: bank_account_id.value,
       status: status.value,
+      search: search.value,
     })
 
     if (error) {
@@ -56,6 +59,19 @@ export function usePayrollBatches() {
   })
 
   watch([page, pageSize], fetchPayrollBatches, { immediate: true })
+
+  // Debounced watch for search input, reset page if not at 1
+  watchDebounced(
+    search,
+    () => {
+      if (page.value === 1) {
+        fetchPayrollBatches()
+      } else {
+        page.value = 1
+      }
+    },
+    { debounce: 300 },
+  )
 
   async function addPayrollBatch(
     periodId: number,
@@ -127,6 +143,7 @@ export function usePayrollBatches() {
     office_id,
     bank_account_id,
     status,
+    search,
     page,
     pageSize,
     addPayrollBatch,

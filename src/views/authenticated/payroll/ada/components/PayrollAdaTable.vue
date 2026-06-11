@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { X, ChevronsUpDown, Check } from '@lucide/vue'
+import { X, ChevronsUpDown, Check, Search as SearchIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
@@ -44,6 +44,7 @@ import ViewOptions from '@/components/ui/custom/data-table/ViewOptions.vue'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
 import { usePayrollPeriods } from '@/composables/payroll/usePayrollPeriods'
 import { formatDate } from '@/helpers/date.helper'
+import { Input } from '@/components/ui/input'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 
@@ -57,6 +58,7 @@ interface Props {
   payrollPeriodId?: number | null
   bankAccountId?: number | null
   status?: string | null
+  search?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -67,6 +69,7 @@ const props = withDefaults(defineProps<Props>(), {
   payrollPeriodId: null,
   bankAccountId: null,
   status: null,
+  search: '',
 })
 
 const emit = defineEmits<{
@@ -75,6 +78,7 @@ const emit = defineEmits<{
   'update:payroll-period-id': [id: number | null]
   'update:bank-account-id': [id: number | null]
   'update:status': [status: string | null]
+  'update:search': [search: string]
   'show-batches': [row: TData]
   edit: [row: TData]
   delete: [row: TData]
@@ -97,6 +101,11 @@ const localStatus = computed({
   set: (val) => emit('update:status', val),
 })
 
+const localSearch = computed({
+  get: () => props.search ?? '',
+  set: (val) => emit('update:search', val),
+})
+
 const openPeriodPopover = ref(false)
 const openBankPopover = ref(false)
 
@@ -114,7 +123,6 @@ const columnVisibility = useStorage<VisibilityState>('ada-table-column-visibilit
   fund_source: false,
   total_batches: false,
 })
-
 
 // ─── Derived: server-side page count ─────────────────────────────────────────
 
@@ -164,7 +172,6 @@ const table = useVueTable({
       typeof updater === 'function' ? updater(columnVisibility.value) : updater
   },
 
-
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
@@ -184,6 +191,14 @@ const table = useVueTable({
   <div :class="cn('max-sm:has-[div[role=\'toolbar\']]:mb-16', 'flex flex-1 flex-col gap-4')">
     <div class="flex flex-col gap-2">
       <div class="flex flex-wrap items-center gap-2">
+        <!-- Search -->
+        <div class="relative w-full max-w-sm">
+          <SearchIcon
+            class="absolute inset-y-0 left-2.5 my-auto text-muted-foreground"
+            :size="16"
+          />
+          <Input v-model="localSearch" placeholder="Search ADA number..." class="h-8 pl-8" />
+        </div>
         <!-- Payroll Period Filter -->
         <Popover v-model:open="openPeriodPopover">
           <PopoverTrigger as-child>
@@ -315,7 +330,7 @@ const table = useVueTable({
         </Select>
 
         <Button
-          v-if="localPayrollPeriodId || localBankAccountId || localStatus"
+          v-if="localPayrollPeriodId || localBankAccountId || localStatus || props.search"
           variant="ghost"
           class="h-8 px-2 lg:px-3"
           @click="
@@ -323,6 +338,7 @@ const table = useVueTable({
               localPayrollPeriodId = null
               localBankAccountId = null
               localStatus = null
+              localSearch = ''
             }
           "
         >

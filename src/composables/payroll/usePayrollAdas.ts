@@ -1,4 +1,5 @@
 import { ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import {
   listPayrollAdas,
   createPayrollAda,
@@ -16,6 +17,7 @@ export function usePayrollAdas() {
   const payroll_period_id = ref<number | null>(null)
   const bank_account_id = ref<number | null>(null)
   const status = ref<string | null>(null)
+  const search = ref('')
 
   const page = ref(1)
   const pageSize = ref(10)
@@ -29,6 +31,7 @@ export function usePayrollAdas() {
       payroll_period_id: payroll_period_id.value,
       bank_account_id: bank_account_id.value,
       status: status.value,
+      search: search.value,
     })
 
     if (error) {
@@ -54,6 +57,19 @@ export function usePayrollAdas() {
   })
 
   watch([page, pageSize], fetchPayrollAdas, { immediate: true })
+
+  // Debounced watch for search input, reset page if not at 1
+  watchDebounced(
+    search,
+    () => {
+      if (page.value === 1) {
+        fetchPayrollAdas()
+      } else {
+        page.value = 1
+      }
+    },
+    { debounce: 300 },
+  )
 
   async function addPayrollAda(
     payrollPeriodId: number,
@@ -128,6 +144,7 @@ export function usePayrollAdas() {
     payroll_period_id,
     bank_account_id,
     status,
+    search,
     page,
     pageSize,
     addPayrollAda,

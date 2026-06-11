@@ -37,4 +37,5 @@ export interface ListPayrollAdasParams {
   payroll_period_id?: number | null
   bank_account_id?: number | null
   status?: string | null
+  search?: string
 }

@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { X, ChevronsUpDown, Check } from '@lucide/vue'
+import { X, ChevronsUpDown, Check, Search as SearchIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
@@ -45,6 +45,7 @@ import { useOffices } from '@/composables/offices/useOffices'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
 import { usePayrollPeriods } from '@/composables/payroll/usePayrollPeriods'
 import { formatDate } from '@/helpers/date.helper'
+import { Input } from '@/components/ui/input'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 
@@ -59,6 +60,7 @@ interface Props {
   officeId?: number | null
   bankAccountId?: number | null
   status?: string | null
+  search?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -70,6 +72,7 @@ const props = withDefaults(defineProps<Props>(), {
   officeId: null,
   bankAccountId: null,
   status: null,
+  search: '',
 })
 
 const emit = defineEmits<{
@@ -79,6 +82,7 @@ const emit = defineEmits<{
   'update:office-id': [id: number | null]
   'update:bank-account-id': [id: number | null]
   'update:status': [status: string | null]
+  'update:search': [search: string]
   'show-employee-payroll': [row: TData]
   edit: [row: TData]
   delete: [row: TData]
@@ -106,6 +110,11 @@ const localStatus = computed({
   set: (val) => emit('update:status', val),
 })
 
+const localSearch = computed({
+  get: () => props.search ?? '',
+  set: (val) => emit('update:search', val),
+})
+
 const openPeriodPopover = ref(false)
 const openOfficePopover = ref(false)
 const openBankPopover = ref(false)
@@ -122,7 +131,6 @@ onMounted(async () => {
 
 const sorting = ref<SortingState>([])
 const columnVisibility = useStorage<VisibilityState>('payroll-batch-table-column-visibility', {})
-
 
 // ─── Derived: server-side page count ─────────────────────────────────────────
 
@@ -172,7 +180,6 @@ const table = useVueTable({
       typeof updater === 'function' ? updater(columnVisibility.value) : updater
   },
 
-
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
@@ -189,6 +196,14 @@ const table = useVueTable({
   <div :class="cn('max-sm:has-[div[role=\'toolbar\']]:mb-16', 'flex flex-1 flex-col gap-4')">
     <div class="flex flex-col gap-2">
       <div class="flex flex-wrap items-center gap-2">
+        <!-- Search -->
+        <div class="relative w-full max-w-62">
+          <SearchIcon
+            class="absolute inset-y-0 left-2.5 my-auto text-muted-foreground"
+            :size="16"
+          />
+          <Input v-model="localSearch" placeholder="Search batch code..." class="h-8 pl-8" />
+        </div>
         <!-- Payroll Period Filter -->
         <Popover v-model:open="openPeriodPopover">
           <PopoverTrigger as-child>
@@ -196,7 +211,7 @@ const table = useVueTable({
               variant="outline"
               role="combobox"
               :aria-expanded="openPeriodPopover"
-              class="h-8 justify-between min-w-55"
+              class="h-8 justify-between min-w-46"
               :class="!localPayrollPeriodId && 'text-muted-foreground'"
             >
               {{
@@ -259,7 +274,7 @@ const table = useVueTable({
               variant="outline"
               role="combobox"
               :aria-expanded="openOfficePopover"
-              class="h-8 justify-between min-w-50"
+              class="h-8 justify-between min-w-46"
               :class="!localOfficeId && 'text-muted-foreground'"
             >
               <span class="truncate">
@@ -318,7 +333,7 @@ const table = useVueTable({
               variant="outline"
               role="combobox"
               :aria-expanded="openBankPopover"
-              class="h-8 justify-between min-w-55"
+              class="h-8 justify-between min-w-46"
               :class="!localBankAccountId && 'text-muted-foreground'"
             >
               {{
@@ -380,7 +395,13 @@ const table = useVueTable({
         </Select>
 
         <Button
-          v-if="localPayrollPeriodId || localOfficeId || localBankAccountId || localStatus"
+          v-if="
+            localPayrollPeriodId ||
+            localOfficeId ||
+            localBankAccountId ||
+            localStatus ||
+            props.search
+          "
           variant="ghost"
           class="h-8 px-2 lg:px-3"
           @click="
@@ -389,6 +410,7 @@ const table = useVueTable({
               localOfficeId = null
               localBankAccountId = null
               localStatus = null
+              localSearch = ''
             }
           "
         >

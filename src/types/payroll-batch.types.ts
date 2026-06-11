@@ -29,4 +29,5 @@ export interface ListPayrollBatchesParams {
   office_id?: number | null
   bank_account_id?: number | null
   status?: string | null
+  search?: string
 }

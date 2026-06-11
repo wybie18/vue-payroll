@@ -78,6 +78,7 @@ export async function listPayrollAdas({
   payroll_period_id = null,
   bank_account_id = null,
   status = null,
+  search = '',
 }: ListPayrollAdasParams = {}): Promise<PaginatedResponse<PayrollAdaWithDetails>> {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -100,6 +101,7 @@ export async function listPayrollAdas({
   if (payroll_period_id) query = query.eq('payroll_period_id', payroll_period_id)
   if (bank_account_id) query = query.eq('bank_account_id', bank_account_id)
   if (status) query = query.eq('status', status)
+  if (search?.trim()) query = query.ilike('ada_number', `%${search.trim()}%`)
 
   const { data, count, error } = await query
 

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import Main from '@/components/layouts/Main.vue'
 import Header from '@/components/ui/custom/Header.vue'
@@ -31,6 +32,7 @@ const {
   payroll_period_id,
   bank_account_id,
   status,
+  search,
   page,
   pageSize,
   addPayrollAda,
@@ -128,6 +130,7 @@ function handleShowBatches(ada: PayrollAdaWithDetails) {
       v-model:payroll-period-id="payroll_period_id"
       v-model:bank-account-id="bank_account_id"
       v-model:status="status"
+      v-model:search="search"
       v-model:page="page"
       @edit="openEdit"
       @delete="openDelete"
