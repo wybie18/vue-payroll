@@ -1,4 +1,5 @@
 import { ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { listAuditLogs } from '@/services/audit-log.service'
 import type { AuditLogWithProfile } from '@/types/audit-log.types'
 import { toast } from 'vue-sonner'
@@ -35,10 +36,30 @@ export function useAuditLogs() {
     isLoading.value = false
   }
 
-  watch([page, pageSize, tableName, action], fetchAuditLogs)
+  // Reset page when action changes (select dropdown, immediate)
+  watch(action, () => {
+    if (page.value === 1) {
+      fetchAuditLogs()
+    } else {
+      page.value = 1
+    }
+  })
 
-  // Initial load
-  Promise.all([fetchAuditLogs()])
+  // Debounced watch for tableName search input
+  watchDebounced(
+    tableName,
+    () => {
+      if (page.value === 1) {
+        fetchAuditLogs()
+      } else {
+        page.value = 1
+      }
+    },
+    { debounce: 300 },
+  )
+
+  // Watch page and pageSize changes immediately
+  watch([page, pageSize], fetchAuditLogs, { immediate: true })
 
   return {
     auditLogs,

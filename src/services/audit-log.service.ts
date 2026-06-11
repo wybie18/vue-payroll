@@ -28,11 +28,11 @@ export async function listAuditLogs({
     .order('changed_at', { ascending: false })
     .range(from, to)
 
-  if (tableName) {
-    query = query.eq('table_name', tableName)
+  if (tableName?.trim()) {
+    query = query.ilike('table_name', `%${tableName.trim()}%`)
   }
-  if (action) {
-    query = query.eq('action', action)
+  if (action?.trim()) {
+    query = query.eq('action', action.trim().toUpperCase())
   }
   if (startDate) {
     query = query.gte('changed_at', startDate)
