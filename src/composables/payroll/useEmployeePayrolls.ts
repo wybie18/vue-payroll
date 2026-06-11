@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { ref, type Ref, watch } from 'vue'
 import {
   listEmployeePayrolls,
   createEmployeePayroll,
@@ -9,7 +9,7 @@ import {
 import type { EmployeePayrollWithEmployee } from '@/types/employee-payroll.types'
 import { toast } from 'vue-sonner'
 
-export function useEmployeePayrolls(batchId: ref<number | null>) {
+export function useEmployeePayrolls(batchId: Ref<number | null>) {
   const employeePayrolls = ref<EmployeePayrollWithEmployee[]>([])
   const totalCount = ref(0)
   const isLoading = ref(false)
@@ -52,7 +52,7 @@ export function useEmployeePayrolls(batchId: ref<number | null>) {
     employee_id: number,
     account_no: string,
     net_pay: number,
-    bank_account_id: number | null
+    bank_account_id: number | null,
   ) {
     if (!batchId.value) return
 
@@ -79,7 +79,7 @@ export function useEmployeePayrolls(batchId: ref<number | null>) {
     employee_id: number,
     account_no: string,
     net_pay: number,
-    bank_account_id: number | null
+    bank_account_id: number | null,
   ) {
     if (!batchId.value) return
 
@@ -120,7 +120,7 @@ export function useEmployeePayrolls(batchId: ref<number | null>) {
       account_no: string
       net_pay: number
       bank_account_id: number | null
-    }[]
+    }[],
   ) {
     if (!batchId.value) return false
 
