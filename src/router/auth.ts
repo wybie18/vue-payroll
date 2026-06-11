@@ -55,4 +55,28 @@ export const authRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/authenticated/payroll/ada/batches/Index.vue'),
     meta: { layout: 'auth', requiresAuth: true },
   },
+
+  {
+    path: '/settings',
+    component: () => import('@/views/authenticated/settings/Index.vue'),
+    meta: { layout: 'auth', requiresAuth: true },
+    redirect: '/settings/profile',
+    children: [
+      {
+        path: 'profile',
+        name: 'SettingsProfile',
+        component: () => import('@/views/authenticated/settings/Profile.vue'),
+      },
+      {
+        path: 'account',
+        name: 'SettingsAccount',
+        component: () => import('@/views/authenticated/settings/Account.vue'),
+      },
+      {
+        path: 'appearance',
+        name: 'SettingsAppearance',
+        component: () => import('@/views/authenticated/settings/Appearance.vue'),
+      },
+    ],
+  },
 ]

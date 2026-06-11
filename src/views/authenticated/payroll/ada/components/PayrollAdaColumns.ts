@@ -7,13 +7,6 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const payrollAdaColumns: ColumnDef<PayrollAdaWithDetails>[] = [
   {
-    accessorKey: 'ada_id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('ada_id')),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'ada_number',
     header: ({ column }) => h(ColumnHeader, { column, title: 'ADA Number' }),
     meta: {
@@ -28,6 +21,7 @@ export const payrollAdaColumns: ColumnDef<PayrollAdaWithDetails>[] = [
         },
         row.getValue('ada_number') as string,
       ),
+    enableHiding: false,
   },
   {
     accessorKey: 'period',

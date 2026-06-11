@@ -7,13 +7,6 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const payrollAdaBatchColumns: ColumnDef<PayrollAdaBatchWithRelations>[] = [
   {
-    accessorKey: 'id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.original.id),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     id: 'batch_code',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Batch Code' }),
     meta: {
@@ -28,6 +21,7 @@ export const payrollAdaBatchColumns: ColumnDef<PayrollAdaBatchWithRelations>[] =
         },
         row.original.batch_code,
       ),
+    enableHiding: false,
   },
   {
     id: 'period',

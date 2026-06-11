@@ -7,16 +7,10 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const officeColumns: ColumnDef<Office>[] = [
   {
-    accessorKey: 'office_id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('office_id')),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'office_code',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Office Code' }),
     cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('office_code')),
+    enableHiding: false,
   },
   {
     accessorKey: 'office_name',

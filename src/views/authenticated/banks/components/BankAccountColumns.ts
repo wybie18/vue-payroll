@@ -6,16 +6,10 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const bankAccountColumns: ColumnDef<AccountWithBank>[] = [
   {
-    accessorKey: 'bank_account_id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('bank_account_id')),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'bank_name',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Bank' }),
     cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('bank_name')),
+    enableHiding: false,
   },
   {
     accessorKey: 'account_number',

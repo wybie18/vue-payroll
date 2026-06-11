@@ -7,16 +7,10 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const employeeColumns: ColumnDef<Employee>[] = [
   {
-    accessorKey: 'id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('id')),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'employee_no',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Employee No' }),
     cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('employee_no')),
+    enableHiding: false,
   },
   {
     accessorKey: 'name',
@@ -39,7 +33,8 @@ export const employeeColumns: ColumnDef<Employee>[] = [
   {
     accessorKey: 'employment_status',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Employment Status' }),
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('employment_status') || 'N/A'),
+    cell: ({ row }) =>
+      h('div', { class: 'font-semibold' }, row.getValue('employment_status') || 'N/A'),
   },
   {
     accessorKey: 'status',

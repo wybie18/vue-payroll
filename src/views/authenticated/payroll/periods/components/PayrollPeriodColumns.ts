@@ -7,19 +7,13 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const payrollPeriodColumns: ColumnDef<PayrollPeriod>[] = [
   {
-    accessorKey: 'payroll_period_id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('payroll_period_id')),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'cutoff_start',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Cutoff Start' }),
     meta: {
       className: 'w-full',
     },
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, formatDate(row.getValue('cutoff_start'))),
+    cell: ({ row }) =>
+      h('div', { class: 'font-semibold' }, formatDate(row.getValue('cutoff_start'))),
   },
   {
     accessorKey: 'cutoff_end',

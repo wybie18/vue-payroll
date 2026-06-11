@@ -7,13 +7,6 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const employeePayrollColumns: ColumnDef<EmployeePayrollWithEmployee>[] = [
   {
-    accessorKey: 'id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('id')),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'employee_name',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Employee Name' }),
     meta: {
@@ -25,6 +18,7 @@ export const employeePayrollColumns: ColumnDef<EmployeePayrollWithEmployee>[] = 
         { class: 'font-semibold truncate' },
         row.original.employee?.name || 'Unknown Employee',
       ),
+    enableHiding: false,
   },
   {
     accessorKey: 'account_no',

@@ -6,24 +6,19 @@ import DataTableRowActions from './DataTableRowActions.vue'
 
 export const bankColumns: ColumnDef<Bank>[] = [
   {
-    accessorKey: 'bank_id',
-    header: '#',
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('bank_id')),
-    enableSorting: true,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'bank_name',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Bank Name' }),
     meta: {
       className: 'w-full',
     },
     cell: ({ row }) => h('div', { class: 'font-semibold truncate' }, row.getValue('bank_name')),
+    enableHiding: false,
   },
   {
     accessorKey: 'bank_abbreviation',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Abbreviation' }),
-    cell: ({ row }) => h('div', { class: 'font-semibold' }, row.getValue('bank_abbreviation') || '-'),
+    cell: ({ row }) =>
+      h('div', { class: 'font-semibold' }, row.getValue('bank_abbreviation') || '-'),
   },
   {
     accessorKey: 'branch_name',
