@@ -78,7 +78,7 @@ export function useEmployees() {
     status: string,
     employee_no: string,
     eenggas_no: string,
-    employment_status: string,
+    employment_status: Employee['employment_status'],
   ) {
     const { error } = await createEmployee({
       name,
@@ -111,7 +111,7 @@ export function useEmployees() {
     status: string,
     employee_no: string,
     eenggas_no: string,
-    employment_status: string,
+    employment_status: Employee['employment_status'],
   ) {
     const { error } = await updateEmployee(id, {
       name,
