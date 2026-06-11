@@ -18,6 +18,7 @@ import { useOffices } from '@/composables/offices/useOffices'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
 import Papa from 'papaparse'
 import type { Employee } from '@/types/employee.types'
+import { Separator } from '@/components/ui/separator'
 
 const VALID_EMPLOYMENT_STATUSES = [
   'Permanent',
@@ -71,7 +72,8 @@ const parsedRows = ref<ParsedRow[]>([])
 const validationErrors = ref<string[]>([])
 
 const downloadTemplate = () => {
-  const csvContent = 'name,employee no,eenggas no,office code,bank account number,personal account number,employment status\nJuan Dela Cruz,EMP-101,EEG-201,HRMO,1234567890,9988776655,Permanent\nMaria Santos,EMP-102,EEG-202,MAYOR,0987654321,5566778899,Casual'
+  const csvContent =
+    'name,employee no,eenggas no,office code,bank account number,personal account number,employment status\nJuan Dela Cruz,EMP-101,EEG-201,HRMO,1234567890,9988776655,Permanent\nMaria Santos,EMP-102,EEG-202,MAYOR,0987654321,5566778899,Casual'
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -117,9 +119,7 @@ const handleParseContent = (content: string) => {
     }
 
     if (row.length < 7) {
-      tempErrors.push(
-        `Row ${index + 1}: Expected 7 columns, got ${row.length}`,
-      )
+      tempErrors.push(`Row ${index + 1}: Expected 7 columns, got ${row.length}`)
       return
     }
 
@@ -167,11 +167,13 @@ const handleParseContent = (content: string) => {
     }
 
     const matchedStatus = VALID_EMPLOYMENT_STATUSES.find(
-      (s) => s.toLowerCase() === employmentStatus.toLowerCase()
+      (s) => s.toLowerCase() === employmentStatus.toLowerCase(),
     )
 
     if (!matchedStatus) {
-      tempErrors.push(`Row ${index + 1}: Employment Status "${employmentStatus}" is invalid. Must be one of: ${VALID_EMPLOYMENT_STATUSES.join(', ')}`)
+      tempErrors.push(
+        `Row ${index + 1}: Employment Status "${employmentStatus}" is invalid. Must be one of: ${VALID_EMPLOYMENT_STATUSES.join(', ')}`,
+      )
       return
     }
 
@@ -301,11 +303,14 @@ const close = () => {
           <div class="text-xs text-muted-foreground space-y-1">
             <p>Your import should contain the following columns in order:</p>
             <code class="block bg-muted p-2 rounded-md font-mono text-foreground mt-1">
-              name, employee no, eenggas no, office code, bank account number, personal account number, employment status<br />
+              name, employee no, eenggas no, office code, bank account number, personal account
+              number, employment status<br />
               Juan Dela Cruz, EMP-101, EEG-201, HRMO, 1234567890, 9988776655, Permanent
             </code>
             <p class="text-[10px] text-muted-foreground mt-2">
-              * Office code (or abbreviation) and agency bank account number must match active records. Employment status must be one of the 11 valid options (e.g. Permanent, Casual). Imported employees default to "active" status.
+              * Office code (or abbreviation) and agency bank account number must match active
+              records. Employment status must be one of the 11 valid options (e.g. Permanent,
+              Casual). Imported employees default to "active" status.
             </p>
           </div>
         </div>

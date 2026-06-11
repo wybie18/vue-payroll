@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Clipboard, Download, AlertTriangle, FileSpreadsheet } from '@lucide/vue'
 import FileDropzone from '@/components/ui/custom/FileDropzone.vue'
 import Papa from 'papaparse'
+import { Separator } from '@/components/ui/separator'
 
 const props = defineProps<{
   open: boolean
@@ -24,10 +25,10 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
   submit: [
     payload: {
-      office_code: string;
-      office_name: string;
-      abbreviation: string | null;
-      status: string;
+      office_code: string
+      office_name: string
+      abbreviation: string | null
+      status: string
     }[],
   ]
 }>()
@@ -47,7 +48,8 @@ const parsedRows = ref<ParsedRow[]>([])
 const validationErrors = ref<string[]>([])
 
 const downloadTemplate = () => {
-  const csvContent = 'office code,office name,abbreviation\nOFF-001,Office of the Mayor,MAYOR\nOFF-002,Human Resource Management Office,HRMO'
+  const csvContent =
+    'office code,office name,abbreviation\nOFF-001,Office of the Mayor,MAYOR\nOFF-002,Human Resource Management Office,HRMO'
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')

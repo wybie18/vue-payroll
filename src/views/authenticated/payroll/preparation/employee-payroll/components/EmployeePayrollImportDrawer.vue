@@ -12,10 +12,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clipboard, Download, AlertTriangle } from '@lucide/vue'
+import { Clipboard, Download, AlertTriangle, FileSpreadsheet, FileUp } from '@lucide/vue'
 import { useEmployees } from '@/composables/employees/useEmployees'
 import FileDropzone from '@/components/ui/custom/FileDropzone.vue'
 import Papa from 'papaparse'
+import { Separator } from '@/components/ui/separator'
+import { Label } from '@/components/ui/label'
 
 const props = defineProps<{
   open: boolean

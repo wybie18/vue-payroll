@@ -16,6 +16,7 @@ import { Clipboard, Download, AlertTriangle, FileSpreadsheet } from '@lucide/vue
 import FileDropzone from '@/components/ui/custom/FileDropzone.vue'
 import { useBanks } from '@/composables/banks/useBanks'
 import Papa from 'papaparse'
+import { Separator } from '@/components/ui/separator'
 
 const props = defineProps<{
   open: boolean
@@ -25,9 +26,9 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
   submit: [
     payload: {
-      bank_id: number;
-      account_number: string;
-      fund_source: 'EE' | 'GF' | 'SH';
+      bank_id: number
+      account_number: string
+      fund_source: 'EE' | 'GF' | 'SH'
     }[],
   ]
 }>()
@@ -53,7 +54,8 @@ const parsedRows = ref<ParsedRow[]>([])
 const validationErrors = ref<string[]>([])
 
 const downloadTemplate = () => {
-  const csvContent = 'bank abbreviation,account number,fund source\nDBP,1234567890,EE\nLBP,0987654321,GF\nBPI,1122334455,SH'
+  const csvContent =
+    'bank abbreviation,account number,fund source\nDBP,1234567890,EE\nLBP,0987654321,GF\nBPI,1122334455,SH'
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -121,7 +123,9 @@ const handleParseContent = (content: string) => {
     }
 
     if (fundSourceInput !== 'EE' && fundSourceInput !== 'GF' && fundSourceInput !== 'SH') {
-      tempErrors.push(`Row ${index + 1}: Invalid Fund Source "${fundSourceInput}". Must be EE, GF, or SH`)
+      tempErrors.push(
+        `Row ${index + 1}: Invalid Fund Source "${fundSourceInput}". Must be EE, GF, or SH`,
+      )
       return
     }
 
@@ -132,7 +136,9 @@ const handleParseContent = (content: string) => {
     )
 
     if (!bank) {
-      tempErrors.push(`Row ${index + 1}: Bank with Abbreviation "${bankAbbreviation}" not found in system`)
+      tempErrors.push(
+        `Row ${index + 1}: Bank with Abbreviation "${bankAbbreviation}" not found in system`,
+      )
       return
     }
 
@@ -236,7 +242,8 @@ const close = () => {
               LBP, 0987654321, GF
             </code>
             <p class="text-[10px] text-muted-foreground mt-2">
-              * Bank abbreviation must match an existing bank in the system. Fund source must be EE, GF, or SH.
+              * Bank abbreviation must match an existing bank in the system. Fund source must be EE,
+              GF, or SH.
             </p>
           </div>
         </div>

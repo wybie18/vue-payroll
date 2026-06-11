@@ -47,6 +47,20 @@ export async function createAdaBatch(
   return { data: data ? mapPayrollAdaBatch(data) : (null as unknown as PayrollAdaBatch), error }
 }
 
+export async function createAdaBatches(
+  adaId: number,
+  batchIds: number[],
+): Promise<ServiceResponse<PayrollAdaBatch[]>> {
+  const payloads = batchIds.map((batchId) => ({
+    ada_id: adaId,
+    batch_id: batchId,
+  }))
+
+  const { data, error } = await supabase.from('t_payroll_ada_batches').insert(payloads).select()
+
+  return { data: (data ?? []).map(mapPayrollAdaBatch), error }
+}
+
 // ─── Delete ───────────────────────────────────────────────────────────────────
 
 export async function deleteAdaBatch(id: number): Promise<ServiceResponse<null>> {

@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Clipboard, Download, AlertTriangle, FileSpreadsheet } from '@lucide/vue'
 import FileDropzone from '@/components/ui/custom/FileDropzone.vue'
 import Papa from 'papaparse'
+import { Separator } from '@/components/ui/separator'
 
 const props = defineProps<{
   open: boolean
@@ -24,10 +25,10 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
   submit: [
     payload: {
-      bank_name: string;
-      bank_abbreviation: string | null;
-      branch_name: string | null;
-      address: string | null;
+      bank_name: string
+      bank_abbreviation: string | null
+      branch_name: string | null
+      address: string | null
     }[],
   ]
 }>()
@@ -47,7 +48,8 @@ const parsedRows = ref<ParsedRow[]>([])
 const validationErrors = ref<string[]>([])
 
 const downloadTemplate = () => {
-  const csvContent = 'bank name,abbreviation,branch name,address\nDevelopment Bank of the Philippines,DBP,Main Branch,Sen. Gil J. Puyat Ave, Makati City\nLand Bank of the Philippines,LBP,Central Office,1598 M.H. Del Pilar cor. Quintos Sts. Malate, Manila'
+  const csvContent =
+    'bank name,abbreviation,branch name,address\nDevelopment Bank of the Philippines,DBP,Main Branch,Sen. Gil J. Puyat Ave, Makati City\nLand Bank of the Philippines,LBP,Central Office,1598 M.H. Del Pilar cor. Quintos Sts. Malate, Manila'
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -197,7 +199,8 @@ const close = () => {
             <p>Your import should contain the following columns in order:</p>
             <code class="block bg-muted p-2 rounded-md font-mono text-foreground mt-1">
               bank name, abbreviation, branch name, address<br />
-              Development Bank of the Philippines, DBP, Main Branch, Sen. Gil J. Puyat Ave, Makati City
+              Development Bank of the Philippines, DBP, Main Branch, Sen. Gil J. Puyat Ave, Makati
+              City
             </code>
             <p class="text-[10px] text-muted-foreground mt-2">
               * Abbreviation, branch name, and address are optional fields.
@@ -280,7 +283,7 @@ const close = () => {
                     <td class="px-3 py-2 font-medium">{{ row.bank_name }}</td>
                     <td class="px-3 py-2 font-mono">{{ row.bank_abbreviation || '-' }}</td>
                     <td class="px-3 py-2">{{ row.branch_name || '-' }}</td>
-                    <td class="px-3 py-2 truncate max-w-[120px]">{{ row.address || '-' }}</td>
+                    <td class="px-3 py-2 truncate max-w-30">{{ row.address || '-' }}</td>
                   </tr>
                 </tbody>
               </table>

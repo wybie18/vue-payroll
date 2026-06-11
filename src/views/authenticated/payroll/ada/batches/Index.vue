@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Main from '@/components/layouts/Main.vue'
 import Header from '@/components/ui/custom/Header.vue'
@@ -12,7 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import Button from '@/components/ui/button/Button.vue'
 import { Plus } from '@lucide/vue'
 
@@ -23,21 +23,24 @@ import { payrollAdaBatchColumns } from './components/PayrollAdaBatchColumns'
 import PayrollAdaBatchDeleteDialog from './components/PayrollAdaBatchDeleteDialog.vue'
 import PayrollAdaBatchMutateDialog from './components/PayrollAdaBatchMutateDialog.vue'
 import PayrollAdaBatchTable from './components/PayrollAdaBatchTable.vue'
+import PayrollAdaBatchEmployeePayrollSheet from './components/PayrollAdaBatchEmployeePayrollSheet.vue'
 
 const route = useRoute()
-const router = useRouter()
 const adaNumber = computed(() => String(route.params.ada_number))
 const adaId = computed(() => Number(route.params.ada_id))
 const bankAccountId = computed(() => Number(route.params.bank_account_id))
 
-const { adaBatches, totalCount, isLoading, page, pageSize, addAdaBatch, removeAdaBatch } =
+const { adaBatches, totalCount, isLoading, page, pageSize, addAdaBatches, removeAdaBatch } =
   usePayrollAdaBatches(adaId)
 
 const { formOpen, openCreate, deleteOpen, adaBatchToDelete, openDelete } =
   usePayrollAdaBatchDialogs()
 
-async function handleSubmit(batchId: number) {
-  await addAdaBatch(batchId)
+const employeePayrollOpen = ref(false)
+const selectedBatchForDetails = ref<PayrollAdaBatchWithRelations | null>(null)
+
+async function handleSubmit(batchIds: number[]) {
+  await addAdaBatches(batchIds)
 }
 
 async function handleDelete(row: PayrollAdaBatchWithRelations) {
@@ -45,10 +48,8 @@ async function handleDelete(row: PayrollAdaBatchWithRelations) {
 }
 
 function handleShowEmployeePayroll(row: PayrollAdaBatchWithRelations) {
-  router.push({
-    name: 'EmployeePayroll',
-    params: { batch_code: row.batch_code, batch_id: row.batch_id },
-  })
+  selectedBatchForDetails.value = row
+  employeePayrollOpen.value = true
 }
 </script>
 
@@ -112,5 +113,9 @@ function handleShowEmployeePayroll(row: PayrollAdaBatchWithRelations) {
     v-model:open="deleteOpen"
     :row="adaBatchToDelete"
     @confirm="handleDelete"
+  />
+  <PayrollAdaBatchEmployeePayrollSheet
+    v-model:open="employeePayrollOpen"
+    :batch="selectedBatchForDetails"
   />
 </template>

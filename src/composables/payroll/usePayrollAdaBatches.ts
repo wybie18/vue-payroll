@@ -2,6 +2,7 @@ import { ref, watch, type Ref } from 'vue'
 import {
   listAdaBatches,
   createAdaBatch,
+  createAdaBatches,
   deleteAdaBatch,
 } from '@/services/payroll-ada-batch.service'
 import type { PayrollAdaBatchWithRelations } from '@/types/payroll-ada-batch.types'
@@ -74,6 +75,24 @@ export function usePayrollAdaBatches(adaId: Ref<number | null>) {
     }
   }
 
+  async function addAdaBatches(batchIds: number[]) {
+    if (!adaId.value || batchIds.length === 0) return
+
+    isLoading.value = true
+    const { error } = await createAdaBatches(adaId.value, batchIds)
+    isLoading.value = false
+
+    if (error) {
+      console.error('[usePayrollAdaBatches] create bulk:', error.message)
+      toast.error('Something went wrong!', {
+        description: 'Failed to link batches to ADA.',
+      })
+    } else {
+      await fetchAdaBatches()
+      toast.success('Batches successfully linked!')
+    }
+  }
+
   async function removeAdaBatch(id: number) {
     const { error } = await deleteAdaBatch(id)
     if (error) {
@@ -94,6 +113,7 @@ export function usePayrollAdaBatches(adaId: Ref<number | null>) {
     page,
     pageSize,
     addAdaBatch,
+    addAdaBatches,
     removeAdaBatch,
     fetchAdaBatches,
   }

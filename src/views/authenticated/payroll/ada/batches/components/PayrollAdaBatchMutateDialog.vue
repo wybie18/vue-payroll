@@ -1,27 +1,16 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetClose,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Check, ChevronsUpDown } from '@lucide/vue'
-import { cn } from '@/lib/utils'
-
+import { Loader2 } from '@lucide/vue'
 import { getPayrollBatchesWithNoAda } from '@/services/payroll-batch.service'
 import type { PayrollBatch } from '@/types/payroll-batch.types'
 
@@ -32,15 +21,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  submit: [batchId: number]
+  submit: [batchIds: number[]]
 }>()
 
 const allBatches = ref<PayrollBatch[]>([])
 const isLoadingBatches = ref(false)
 
-const selectedBatchId = ref<number | null>(null)
+const selectedBatchIds = ref<number[]>([])
 const errorText = ref('')
-const openBatchPopover = ref(false)
 
 const fetchUnassignedBatches = async () => {
   isLoadingBatches.value = true
@@ -55,7 +43,7 @@ watch(
   () => props.open,
   (isOpen) => {
     if (isOpen) {
-      selectedBatchId.value = null
+      selectedBatchIds.value = []
       errorText.value = ''
       fetchUnassignedBatches()
     }
@@ -63,19 +51,46 @@ watch(
   { immediate: true },
 )
 
+const toggleSelectAll = () => {
+  if (selectedBatchIds.value.length === allBatches.value.length) {
+    selectedBatchIds.value = []
+  } else {
+    selectedBatchIds.value = allBatches.value.map((b) => b.batch_id)
+  }
+}
+
+const toggleSelect = (id: number) => {
+  const idx = selectedBatchIds.value.indexOf(id)
+  if (idx > -1) {
+    selectedBatchIds.value.splice(idx, 1)
+  } else {
+    selectedBatchIds.value.push(id)
+  }
+}
+
+const isAllSelected = () => {
+  return allBatches.value.length > 0 && selectedBatchIds.value.length === allBatches.value.length
+}
+
+const isSomeSelected = () => {
+  return (
+    selectedBatchIds.value.length > 0 && selectedBatchIds.value.length < allBatches.value.length
+  )
+}
+
 const handleSubmit = () => {
-  if (!selectedBatchId.value) {
-    errorText.value = 'Please select a payroll batch to link.'
+  if (selectedBatchIds.value.length === 0) {
+    errorText.value = 'Please select at least one payroll batch to link.'
     return
   }
 
-  emit('submit', selectedBatchId.value)
+  emit('submit', selectedBatchIds.value)
   emit('update:open', false)
 }
 </script>
 
 <template>
-  <Dialog
+  <Sheet
     :open="open"
     @update:open="
       (val) => {
@@ -83,81 +98,100 @@ const handleSubmit = () => {
       }
     "
   >
-    <DialogContent class="sm:max-w-106.25">
-      <DialogHeader>
-        <DialogTitle>Add Payroll Batch</DialogTitle>
-        <DialogDescription> Select a payroll batch to associate with this ADA. </DialogDescription>
-      </DialogHeader>
+    <SheetContent class="flex flex-col w-full sm:max-w-2xl overflow-hidden">
+      <SheetHeader class="text-start">
+        <SheetTitle>Add Payroll Batches</SheetTitle>
+        <SheetDescription>
+          Select one or more unassigned payroll batches to associate with this ADA.
+        </SheetDescription>
+      </SheetHeader>
 
-      <div class="grid gap-4 py-4">
-        <!-- Payroll Batch -->
-        <div class="grid gap-2">
-          <Label for="payroll-batch" class="text-sm font-medium">
-            Payroll Batch <span class="text-destructive">*</span>
-          </Label>
-          <Popover v-model:open="openBatchPopover">
-            <PopoverTrigger as-child>
-              <Button
-                id="payroll-batch"
-                variant="outline"
-                role="combobox"
-                :aria-expanded="openBatchPopover"
-                class="w-full justify-between"
-                :class="!selectedBatchId && 'text-muted-foreground'"
-              >
-                <span class="truncate">
-                  {{
-                    selectedBatchId
-                      ? allBatches.find((x) => x.batch_id === selectedBatchId)?.batch_code ||
-                        'Select batch...'
-                      : 'Select batch...'
-                  }}
-                </span>
-                <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="p-0">
-              <Command>
-                <CommandInput placeholder="Search batch code..." />
-                <CommandEmpty>No batch found.</CommandEmpty>
-                <CommandList>
-                  <CommandGroup>
-                    <CommandItem
-                      v-for="batch in allBatches"
-                      :key="batch.batch_id"
-                      :value="batch.batch_code"
-                      @select="
-                        () => {
-                          selectedBatchId = batch.batch_id
-                          errorText = ''
-                          openBatchPopover = false
-                        }
+      <!-- Content Section -->
+      <div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
+        <div v-if="isLoadingBatches" class="flex flex-1 items-center justify-center py-12">
+          <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+
+        <template v-else>
+          <div
+            v-if="allBatches.length === 0"
+            class="flex flex-1 flex-col items-center justify-center py-12 border border-dashed rounded-lg"
+          >
+            <p class="text-sm text-muted-foreground">No unassigned payroll batches found.</p>
+            <p class="text-xs text-muted-foreground/60 mt-1">
+              All batches for this bank account are already linked.
+            </p>
+          </div>
+
+          <div v-else class="border rounded-md overflow-hidden">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b bg-muted/50 text-xs font-medium text-muted-foreground">
+                  <th class="p-3 text-center w-12.5">
+                    <input
+                      type="checkbox"
+                      :checked="isAllSelected()"
+                      :indeterminate="isSomeSelected()"
+                      @change="toggleSelectAll"
+                      class="rounded border-slate-350 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                    />
+                  </th>
+                  <th class="p-3 text-start">Batch Code</th>
+                  <th class="p-3 text-start">Description</th>
+                  <th class="p-3 text-center w-25">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="batch in allBatches"
+                  :key="batch.batch_id"
+                  class="border-b transition-colors hover:bg-muted/40 cursor-pointer"
+                  @click="toggleSelect(batch.batch_id)"
+                >
+                  <td class="p-3 text-center" @click.stop>
+                    <input
+                      type="checkbox"
+                      :checked="selectedBatchIds.includes(batch.batch_id)"
+                      @change="toggleSelect(batch.batch_id)"
+                      class="rounded border-slate-350 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                    />
+                  </td>
+                  <td class="p-3 font-semibold">{{ batch.batch_code }}</td>
+                  <td
+                    class="p-3 text-muted-foreground truncate max-w-50"
+                    :title="batch.description || ''"
+                  >
+                    {{ batch.description || '-' }}
+                  </td>
+                  <td class="p-3 text-center">
+                    <span
+                      class="px-2 py-0.5 rounded-full text-xs font-medium"
+                      :class="
+                        batch.status === 'Draft'
+                          ? 'bg-slate-100 text-slate-800'
+                          : 'bg-emerald-100 text-emerald-800'
                       "
                     >
-                      <Check
-                        :class="
-                          cn(
-                            'mr-2 h-4 w-4',
-                            selectedBatchId === batch.batch_id ? 'opacity-100' : 'opacity-0',
-                          )
-                        "
-                      />
-                      {{ batch.batch_code }}
-                      <span class="text-xs text-muted-foreground ml-2"> ({{ batch.status }}) </span>
-                    </CommandItem>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          <span v-if="errorText" class="text-sm text-destructive mt-1">{{ errorText }}</span>
-        </div>
+                      {{ batch.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <span v-if="errorText" class="text-sm text-destructive">{{ errorText }}</span>
       </div>
 
-      <DialogFooter class="sm:justify-end gap-2">
-        <Button variant="outline" @click="emit('update:open', false)">Cancel</Button>
-        <Button @click="handleSubmit">Link Batch</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+      <SheetFooter class="border-t pt-4 gap-2">
+        <SheetClose as-child>
+          <Button variant="outline" @click="emit('update:open', false)">Cancel</Button>
+        </SheetClose>
+        <Button @click="handleSubmit" :disabled="selectedBatchIds.length === 0">
+          Link Batches ({{ selectedBatchIds.length }})
+        </Button>
+      </SheetFooter>
+    </SheetContent>
+  </Sheet>
 </template>
