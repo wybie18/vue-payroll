@@ -231,7 +231,7 @@ const handleSubmit = () => {
                 <span class="truncate">
                   {{
                     form.office_id
-                      ? allOffices.find((x) => x.office_id === form.office_id)?.office_name
+                      ? allOffices.find((x) => x.office_id === form.office_id)?.abbreviation
                       : 'Select office...'
                   }}
                 </span>
