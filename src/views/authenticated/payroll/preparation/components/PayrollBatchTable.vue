@@ -273,11 +273,18 @@ const table = useVueTable({
               class="h-8 justify-between min-w-50"
               :class="!localOfficeId && 'text-muted-foreground'"
             >
-              {{
-                localOfficeId
-                  ? allOffices.find((x) => x.office_id === localOfficeId)?.office_name
-                  : 'Filter by office...'
-              }}
+              <span class="truncate">
+                {{
+                  localOfficeId
+                    ? (() => {
+                        const office = allOffices.find((x) => x.office_id === localOfficeId)
+                        return office
+                          ? `${office.abbreviation} (${office.office_code})`
+                          : 'Unknown Office'
+                      })()
+                    : 'Filter by office...'
+                }}
+              </span>
               <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -306,7 +313,7 @@ const table = useVueTable({
                         )
                       "
                     />
-                    {{ office.office_name }}
+                    {{ office.abbreviation }}
                     {{ office.office_code ? `(${office.office_code})` : '' }}
                   </CommandItem>
                 </CommandGroup>
@@ -331,7 +338,7 @@ const table = useVueTable({
                       const acc = allAccountsWithBank.find(
                         (x) => x.bank_account_id === localBankAccountId,
                       )
-                      return acc ? `${acc.account_number} - ${acc.bank_name}` : 'Unknown Bank'
+                      return acc ? `${acc.bank_abbreviation} - ${acc.fund_source}` : 'Unknown Bank'
                     })()
                   : 'Filter by bank account...'
               }}
@@ -364,9 +371,8 @@ const table = useVueTable({
                         )
                       "
                     />
-                    {{ acc.account_number }}-{{ acc.bank_name }}
+                    {{ acc.bank_abbreviation }}-{{ acc.fund_source }}
                     <!-- {{ acc.branch_name ? `(${acc.branch_name})` : '' }} -->
-                    {{ acc.fund_source ? ` (${acc.fund_source})` : '' }}
                   </CommandItem>
                 </CommandGroup>
               </CommandList>

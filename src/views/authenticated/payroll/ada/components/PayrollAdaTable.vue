@@ -274,7 +274,7 @@ const table = useVueTable({
                       const acc = allAccountsWithBank.find(
                         (x) => x.bank_account_id === localBankAccountId,
                       )
-                      return acc ? `${acc.account_number} - ${acc.bank_name}` : 'Unknown Bank'
+                      return acc ? `${acc.bank_abbreviation} - ${acc.fund_source}` : 'Unknown Bank'
                     })()
                   : 'Filter by bank account...'
               }}
@@ -307,8 +307,7 @@ const table = useVueTable({
                         )
                       "
                     />
-                    {{ acc.account_number }}-{{ acc.bank_name }}
-                    {{ acc.fund_source ? ` (${acc.fund_source})` : '' }}
+                    {{ acc.bank_abbreviation }}-{{ acc.fund_source }}
                   </CommandItem>
                 </CommandGroup>
               </CommandList>
