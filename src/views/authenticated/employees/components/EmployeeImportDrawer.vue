@@ -17,6 +17,7 @@ import FileDropzone from '@/components/ui/custom/FileDropzone.vue'
 import { useOffices } from '@/composables/offices/useOffices'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
 import Papa from 'papaparse'
+import type { Employee } from '@/types/employee.types'
 
 const VALID_EMPLOYMENT_STATUSES = [
   'Permanent',
@@ -30,7 +31,7 @@ const VALID_EMPLOYMENT_STATUSES = [
   'Detailed',
   'Probationary',
   'Appointed',
-]
+] as const
 
 const props = defineProps<{
   open: boolean
@@ -38,18 +39,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  submit: [
-    payload: {
-      name: string;
-      office_id: number;
-      bank_account_id: number;
-      account_no: string;
-      status: string;
-      employee_no: string;
-      eenggas_no: string;
-      employment_status: string;
-    }[],
-  ]
+  submit: [payload: Omit<Employee, 'id' | 'created_at' | 'updated_at'>[]]
 }>()
 
 const { allOffices, fetchAllOffices } = useOffices()
@@ -74,7 +64,7 @@ interface ParsedRow {
   bank_account_number: string
   account_no: string
   status: string
-  employment_status: string
+  employment_status: Employee['employment_status']
 }
 
 const parsedRows = ref<ParsedRow[]>([])

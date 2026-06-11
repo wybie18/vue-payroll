@@ -53,7 +53,7 @@ async function handleSubmit(data: {
   status: string
   employee_no: string
   eenggas_no: string
-  employment_status: string
+  employment_status: Employee['employment_status']
 }) {
   const { name, office_id, bank_account_id, account_no, status, employee_no, eenggas_no, employment_status } = data
   if (selectedEmployee.value) {

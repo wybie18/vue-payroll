@@ -49,7 +49,7 @@ const emit = defineEmits<{
       status: string
       employee_no: string
       eenggas_no: string
-      employment_status: string
+      employment_status: Employee['employment_status']
     },
   ]
 }>()
@@ -178,7 +178,7 @@ function handleSubmit() {
     employee_no: employeeNo.value.trim(),
     eenggas_no: eenggasNo.value.trim(),
     status: status.value ? 'active' : 'inactive',
-    employment_status: employmentStatus.value,
+    employment_status: employmentStatus.value as Employee['employment_status'],
   })
   close()
 }

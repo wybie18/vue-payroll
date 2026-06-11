@@ -7,7 +7,14 @@ export interface PayrollAda {
   ada_number: string
   ada_date: string
   status: string
-  compensation_type: string
+  compensation_type:
+    | 'allowance'
+    | 'salary'
+    | 'overtime'
+    | 'honorarium'
+    | 'mixed'
+    | 'refund'
+    | 'wages'
   created_at: string | null
   updated_at: string | null
 }

@@ -5,7 +5,7 @@ import {
   updatePayrollAda,
   deletePayrollAda,
 } from '@/services/payroll-ada.service'
-import type { PayrollAdaWithDetails } from '@/types/payroll-ada.types'
+import type { PayrollAda, PayrollAdaWithDetails } from '@/types/payroll-ada.types'
 import { toast } from 'vue-sonner'
 
 export function usePayrollAdas() {
@@ -60,7 +60,7 @@ export function usePayrollAdas() {
     bankAccountId: number,
     adaDate: string,
     statusVal: string,
-    compensationType: string,
+    compensationType: PayrollAda['compensation_type'],
   ) {
     const { error } = await createPayrollAda({
       payroll_period_id: payrollPeriodId,
@@ -87,7 +87,7 @@ export function usePayrollAdas() {
     bankAccountId: number,
     adaDate: string,
     statusVal: string,
-    compensationType: string,
+    compensationType: PayrollAda['compensation_type'],
   ) {
     const { error } = await updatePayrollAda(id, {
       payroll_period_id: payrollPeriodId,

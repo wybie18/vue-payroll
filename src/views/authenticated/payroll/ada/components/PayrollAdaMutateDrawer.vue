@@ -35,7 +35,7 @@ import { today, getLocalTimeZone } from '@internationalized/date'
 
 const todayString = () => today(getLocalTimeZone()).toString()
 
-import type { PayrollAdaWithDetails } from '@/types/payroll-ada.types'
+import type { PayrollAda, PayrollAdaWithDetails } from '@/types/payroll-ada.types'
 import {
   validatePayrollAdaForm,
   type PayrollAdaFormErrors,
@@ -57,7 +57,7 @@ const emit = defineEmits<{
       bank_account_id: number
       ada_date: string
       status: string
-      compensation_type: string
+      compensation_type: PayrollAda['compensation_type']
     },
   ]
 }>()
@@ -153,7 +153,7 @@ const handleSubmit = () => {
     bank_account_id: form.value.bank_account_id!,
     ada_date: form.value.ada_date,
     status: form.value.status,
-    compensation_type: form.value.compensation_type,
+    compensation_type: form.value.compensation_type as PayrollAda['compensation_type'],
   })
   emit('update:open', false)
 }

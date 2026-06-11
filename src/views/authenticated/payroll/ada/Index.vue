@@ -16,7 +16,7 @@ import { Plus } from '@lucide/vue'
 
 import { usePayrollAdaDialogs } from '@/composables/payroll/usePayrollAdaDialogs'
 import { usePayrollAdas } from '@/composables/payroll/usePayrollAdas'
-import type { PayrollAdaWithDetails } from '@/types/payroll-ada.types'
+import type { PayrollAda, PayrollAdaWithDetails } from '@/types/payroll-ada.types'
 import { payrollAdaColumns } from './components/PayrollAdaColumns.ts'
 import PayrollAdaDeleteDialog from './components/PayrollAdaDeleteDialog.vue'
 import PayrollAdaMutateDrawer from './components/PayrollAdaMutateDrawer.vue'
@@ -53,7 +53,7 @@ async function handleSubmit(data: {
   bank_account_id: number
   ada_date: string
   status: string
-  compensation_type: string
+  compensation_type: PayrollAda['compensation_type']
 }) {
   const { payroll_period_id, bank_account_id, ada_date, status, compensation_type } = data
   if (selectedPayrollAda.value) {
