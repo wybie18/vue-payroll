@@ -22,7 +22,6 @@ export interface ListAuditLogsParams {
   pageSize?: number
   tableName?: string | null
   action?: string | null
-  changedBy?: string | null
   startDate?: string | null
   endDate?: string | null
 }

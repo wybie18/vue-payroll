@@ -57,6 +57,12 @@ export const authRoutes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/audit-logs',
+    name: 'AuditLogs',
+    component: () => import('@/views/authenticated/audit-logs/Index.vue'),
+    meta: { layout: 'auth', requiresAuth: true },
+  },
+  {
     path: '/settings',
     component: () => import('@/views/authenticated/settings/Index.vue'),
     meta: { layout: 'auth', requiresAuth: true },

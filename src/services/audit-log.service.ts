@@ -1,36 +1,7 @@
 import { supabase } from '@/lib/supabase'
-import type { ServiceResponse, PaginatedResponse } from '@/types/response.types'
-import type { AuditLog, AuditLogWithProfile, ListAuditLogsParams } from '@/types/audit-log.types'
-import { mapAuditLog, mapAuditLogWithProfile } from '@/helpers/audit-log.helper'
-
-// ─── Get By ID ────────────────────────────────────────────────────────────────
-
-export async function getAuditLogById(id: string): Promise<ServiceResponse<AuditLogWithProfile | null>> {
-  const { data, error } = await supabase
-    .from('audit_logs')
-    .select(`
-      *,
-      profile:profiles(email, first_name, last_name, middle_name)
-    `)
-    .eq('id', id)
-    .maybeSingle()
-
-  return { data: data ? mapAuditLogWithProfile(data) : null, error }
-}
-
-// ─── Create ───────────────────────────────────────────────────────────────────
-
-export async function createAuditLog(
-  payload: Omit<AuditLog, 'id' | 'changed_at'>,
-): Promise<ServiceResponse<AuditLog>> {
-  const { data, error } = await supabase
-    .from('audit_logs')
-    .insert(payload)
-    .select()
-    .single()
-
-  return { data: data ? mapAuditLog(data) : (null as unknown as AuditLog), error }
-}
+import type { PaginatedResponse } from '@/types/response.types'
+import type { AuditLogWithProfile, ListAuditLogsParams } from '@/types/audit-log.types'
+import { mapAuditLogWithProfile } from '@/helpers/audit-log.helper'
 
 // ─── List (Paginated + Filter) ────────────────────────────────────────────────
 
@@ -39,7 +10,6 @@ export async function listAuditLogs({
   pageSize = 10,
   tableName = null,
   action = null,
-  changedBy = null,
   startDate = null,
   endDate = null,
 }: ListAuditLogsParams = {}): Promise<PaginatedResponse<AuditLogWithProfile>> {
@@ -48,10 +18,13 @@ export async function listAuditLogs({
 
   let query = supabase
     .from('audit_logs')
-    .select(`
+    .select(
+      `
       *,
       profile:profiles(email, first_name, last_name, middle_name)
-    `, { count: 'exact' })
+    `,
+      { count: 'exact' },
+    )
     .order('changed_at', { ascending: false })
     .range(from, to)
 
@@ -60,9 +33,6 @@ export async function listAuditLogs({
   }
   if (action) {
     query = query.eq('action', action)
-  }
-  if (changedBy) {
-    query = query.eq('changed_by', changedBy)
   }
   if (startDate) {
     query = query.gte('changed_at', startDate)
