@@ -32,7 +32,6 @@ export function useEmployees() {
       search: search.value,
       officeId: officeId.value,
       status: status.value,
-      batchId: batchId.value,
     })
 
     if (error) {
