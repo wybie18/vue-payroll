@@ -1,10 +1,21 @@
 import { supabase } from '@/lib/supabase'
 import type { ServiceResponse, PaginatedResponse } from '@/types/response.types'
-import type { PayrollAdaBatch, PayrollAdaBatchWithRelations } from '@/types/payroll-ada-batch.types'
+import type {
+  AdaDetails,
+  PayrollAdaBatch,
+  PayrollAdaBatchWithRelations,
+} from '@/types/payroll-ada-batch.types'
 import {
+  mapAdaDetails,
   mapPayrollAdaBatch,
   mapPayrollAdaBatchWithRelations,
 } from '@/helpers/payroll-ada-batch.helper'
+
+export async function getAdaDetails(adaId: number): Promise<ServiceResponse<AdaDetails>> {
+  const { data, error } = await supabase.rpc('fn_get_ada_employees', { p_ada_id: adaId })
+
+  return { data: mapAdaDetails(data), error }
+}
 
 // ──── Get By ADA ──────────────────────────────────────────────────────────────
 

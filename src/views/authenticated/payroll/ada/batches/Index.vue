@@ -14,16 +14,27 @@ import {
 } from '@/components/ui/breadcrumb'
 import { RouterLink } from 'vue-router'
 import Button from '@/components/ui/button/Button.vue'
-import { Plus } from '@lucide/vue'
+import { ChevronDown, Download, Plus, Printer } from '@lucide/vue'
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { usePayrollAdaBatchDialogs } from '@/composables/payroll/usePayrollAdaBatchDialogs'
 import { usePayrollAdaBatches } from '@/composables/payroll/usePayrollAdaBatches'
+import { useAdaExport } from '@/composables/payroll/useAdaExport'
+import { useAdaPrint } from '@/composables/payroll/useAdaPrint'
 import type { PayrollAdaBatchWithRelations } from '@/types/payroll-ada-batch.types'
 import { payrollAdaBatchColumns } from './components/PayrollAdaBatchColumns'
 import PayrollAdaBatchDeleteDialog from './components/PayrollAdaBatchDeleteDialog.vue'
 import PayrollAdaBatchMutateDialog from './components/PayrollAdaBatchMutateDialog.vue'
 import PayrollAdaBatchTable from './components/PayrollAdaBatchTable.vue'
 import PayrollAdaBatchEmployeePayrollSheet from './components/PayrollAdaBatchEmployeePayrollSheet.vue'
+import AdaProoflistPrint from './components/AdaProoflistPrint.vue'
+import AdaFormPrint from './components/AdaFormPrint.vue'
 
 const route = useRoute()
 const adaNumber = computed(() => String(route.params.ada_number))
@@ -32,6 +43,9 @@ const bankAccountId = computed(() => Number(route.params.bank_account_id))
 
 const { adaBatches, totalCount, isLoading, page, pageSize, addAdaBatches, removeAdaBatch } =
   usePayrollAdaBatches(adaId)
+
+const { isExporting, exportToText } = useAdaExport(adaId, adaNumber)
+const { isPrinting, printData, printMode, printProoflist, printAdaForm } = useAdaPrint(adaId)
 
 const { formOpen, openCreate, deleteOpen, adaBatchToDelete, openDelete } =
   usePayrollAdaBatchDialogs()
@@ -86,10 +100,35 @@ function handleShowEmployeePayroll(row: PayrollAdaBatchWithRelations) {
         <h2 class="text-2xl font-bold tracking-tight">{{ adaNumber }}</h2>
         <p class="text-muted-foreground">Manage payroll batches associated with this ADA.</p>
       </div>
-      <Button class="space-x-1" @click="openCreate">
-        <span>Add Batch</span>
-        <Plus :size="18" />
-      </Button>
+      <div class="flex items-center gap-2">
+        <DropdownMenu :modal="false">
+          <DropdownMenuTrigger as-child>
+            <Button variant="outline" class="space-x-1" :disabled="isExporting || isPrinting">
+              <span>{{ isExporting ? 'Exporting…' : isPrinting ? 'Opening…' : 'Actions' }}</span>
+              <ChevronDown :size="16" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem @click="exportToText">
+              <Download :size="14" class="mr-2" />
+              Export ADA
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem @click="printProoflist">
+              <Printer :size="14" class="mr-2" />
+              Print DBP-Prooflist
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="printAdaForm">
+              <Printer :size="14" class="mr-2" />
+              Print DBP-ADA
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button class="space-x-1" @click="openCreate">
+          <span>Add Batch</span>
+          <Plus :size="18" />
+        </Button>
+      </div>
     </div>
 
     <PayrollAdaBatchTable
@@ -118,4 +157,8 @@ function handleShowEmployeePayroll(row: PayrollAdaBatchWithRelations) {
     v-model:open="employeePayrollOpen"
     :batch="selectedBatchForDetails"
   />
+  <Teleport to="body">
+    <AdaProoflistPrint v-if="printMode === 'prooflist' && printData" :data="printData" />
+    <AdaFormPrint v-if="printMode === 'ada' && printData" :data="printData" />
+  </Teleport>
 </template>
