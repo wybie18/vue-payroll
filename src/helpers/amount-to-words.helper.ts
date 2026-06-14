@@ -21,30 +21,17 @@ const _ones = [
   'NINETEEN',
 ]
 
-const _tens = [
-  '',
-  '',
-  'TWENTY',
-  'THIRTY',
-  'FORTY',
-  'FIFTY',
-  'SIXTY',
-  'SEVENTY',
-  'EIGHTY',
-  'NINETY',
-]
+const _tens = ['', '', 'TWENTY', 'THIRTY', 'FORTY', 'FIFTY', 'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY']
 
 function _toWords(n: number): string {
   if (n === 0) return ''
-  if (n < 20) return _ones[n]
+  if (n < 20) return _ones[n]!
   if (n < 100) return _tens[Math.floor(n / 10)] + (n % 10 ? '-' + _ones[n % 10] : '')
   if (n < 1_000)
     return _ones[Math.floor(n / 100)] + ' HUNDRED' + (n % 100 ? ' ' + _toWords(n % 100) : '')
   if (n < 1_000_000)
     return (
-      _toWords(Math.floor(n / 1_000)) +
-      ' THOUSAND' +
-      (n % 1_000 ? ' ' + _toWords(n % 1_000) : '')
+      _toWords(Math.floor(n / 1_000)) + ' THOUSAND' + (n % 1_000 ? ' ' + _toWords(n % 1_000) : '')
     )
   if (n < 1_000_000_000)
     return (
@@ -65,7 +52,7 @@ function _toWords(n: number): string {
  */
 export function amountToWords(amount: number): string {
   const [intStr, decStr] = amount.toFixed(2).split('.')
-  const intPart = parseInt(intStr)
+  const intPart = parseInt(intStr!)
   const cents = decStr ?? '00'
   const words = intPart === 0 ? 'ZERO' : _toWords(intPart)
   return `${words} & ${cents}/100`
