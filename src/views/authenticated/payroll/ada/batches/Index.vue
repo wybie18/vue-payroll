@@ -15,18 +15,19 @@ import {
 import { RouterLink } from 'vue-router'
 import Button from '@/components/ui/button/Button.vue'
 import { ChevronDown, Download, Plus, Printer } from '@lucide/vue'
+import type { Component } from 'vue'
 
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { usePayrollAdaBatchDialogs } from '@/composables/payroll/usePayrollAdaBatchDialogs'
 import { usePayrollAdaBatches } from '@/composables/payroll/usePayrollAdaBatches'
-import { useAdaExport } from '@/composables/payroll/useAdaExport'
-import { useAdaPrint } from '@/composables/payroll/useAdaPrint'
+import { useAdaBankActions } from '@/composables/payroll/useAdaBankActions'
 import type { PayrollAdaBatchWithRelations } from '@/types/payroll-ada-batch.types'
 import { payrollAdaBatchColumns } from './components/PayrollAdaBatchColumns'
 import PayrollAdaBatchDeleteDialog from './components/PayrollAdaBatchDeleteDialog.vue'
@@ -44,8 +45,11 @@ const bankAccountId = computed(() => Number(route.params.bank_account_id))
 const { adaBatches, totalCount, isLoading, page, pageSize, addAdaBatches, removeAdaBatch } =
   usePayrollAdaBatches(adaId)
 
-const { isExporting, exportToText } = useAdaExport(adaId, adaNumber)
-const { isPrinting, printData, printMode, printProoflist, printAdaForm } = useAdaPrint(adaId)
+const { actionGroups, hasActions, isBusy, handleAction, printData, printMode } =
+  useAdaBankActions(adaId, adaNumber)
+
+// Icon map — kept in the view so the config stays free of Vue imports
+const iconMap: Record<string, Component> = { Download, Printer }
 
 const { formOpen, openCreate, deleteOpen, adaBatchToDelete, openDelete } =
   usePayrollAdaBatchDialogs()
@@ -101,27 +105,28 @@ function handleShowEmployeePayroll(row: PayrollAdaBatchWithRelations) {
         <p class="text-muted-foreground">Manage payroll batches associated with this ADA.</p>
       </div>
       <div class="flex items-center gap-2">
-        <DropdownMenu :modal="false">
+        <DropdownMenu v-if="hasActions" :modal="false">
           <DropdownMenuTrigger as-child>
-            <Button variant="outline" class="space-x-1" :disabled="isExporting || isPrinting">
-              <span>{{ isExporting ? 'Exporting…' : isPrinting ? 'Opening…' : 'Actions' }}</span>
+            <Button variant="outline" class="space-x-1" :disabled="isBusy">
+              <span>{{ isBusy ? 'Please wait…' : 'Actions' }}</span>
               <ChevronDown :size="16" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem @click="exportToText">
-              <Download :size="14" class="mr-2" />
-              Export ADA
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem @click="printProoflist">
-              <Printer :size="14" class="mr-2" />
-              Print DBP-Prooflist
-            </DropdownMenuItem>
-            <DropdownMenuItem @click="printAdaForm">
-              <Printer :size="14" class="mr-2" />
-              Print DBP-ADA
-            </DropdownMenuItem>
+            <template v-for="(group, groupIdx) in actionGroups" :key="groupIdx">
+              <DropdownMenuSeparator v-if="groupIdx > 0" />
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  v-for="action in group.actions"
+                  :key="action.type"
+                  :disabled="isBusy"
+                  @click="handleAction(action.type)"
+                >
+                  <component :is="iconMap[action.icon]" :size="14" class="mr-2" />
+                  {{ action.label }}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </template>
           </DropdownMenuContent>
         </DropdownMenu>
         <Button class="space-x-1" @click="openCreate">
