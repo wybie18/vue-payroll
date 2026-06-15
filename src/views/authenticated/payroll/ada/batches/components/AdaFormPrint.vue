@@ -85,8 +85,7 @@ const amountWords = computed(() => amountToWords(props.data.total_net_pay))
       <p class="font-bold mb-8">AGENCY AUTHORIZED SIGNATORIES:</p>
       <div class="flex gap-10">
         <div class="min-w-50 text-center">
-          <div class="border-t border-black mb-1"></div>
-          <p class="font-bold m-0">GRACE CARMEL D. PAREDES-BRAVO</p>
+          <p class="font-bold m-0 border-b border-black">GRACE CARMEL D. PAREDES-BRAVO</p>
           <p class="text-[9pt] m-0">Municipal Mayor</p>
         </div>
       </div>
