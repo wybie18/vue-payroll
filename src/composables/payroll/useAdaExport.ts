@@ -8,18 +8,28 @@ function padRight(str: string, length: number): string {
   return str.padEnd(length, ' ')
 }
 
+function padLeft(str: string, length: number): string {
+  return str.padStart(length, ' ')
+}
+
 function buildAdaTextContent(details: AdaDetails): string {
   const lines: string[] = []
-  const col = 66
+  const nameColWidth = 60
+  const amountColWidth = 13
 
-  lines.push(
-    `${padRight(formatAccountNo(details.bank_account.account_number) + 'LGU SAN FRANCISCO', col)}${formatCurrency(details.total_net_pay)}`,
-  )
+  const headerText = formatAccountNo(details.bank_account.account_number) + 'LGU SAN FRANCISCO'
+  const headerAmount = formatCurrency(details.total_net_pay).replace(/,/g, '')
+
+  lines.push(`${padRight(headerText, nameColWidth)}${padLeft(headerAmount, amountColWidth)}`)
 
   for (const emp of details.employees) {
     const empAccountNo = formatAccountNo(emp.account_no)
     const empName = formatName(emp.name)
-    lines.push(`${padRight(empAccountNo + empName, col)}${formatCurrency(emp.net_pay)}`)
+    const empAmount = formatCurrency(emp.net_pay).replace(/,/g, '')
+
+    lines.push(
+      `${padRight(empAccountNo + empName, nameColWidth)}${padLeft(empAmount, amountColWidth)}`,
+    )
   }
 
   return lines.join('\n')

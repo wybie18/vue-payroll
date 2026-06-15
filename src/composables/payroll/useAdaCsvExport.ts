@@ -57,7 +57,7 @@ export function useAdaCsvExport(adaId: Ref<number | null>, adaNumber: Ref<string
       ...data.employees.map((emp) => [
         formatAccountNo(emp.account_no),
         formatName(emp.name),
-        formatCurrency(emp.net_pay).replace('.', ''),
+        formatCurrency(emp.net_pay).replace(/[,.]/g, ''),
       ]),
     ]
 
