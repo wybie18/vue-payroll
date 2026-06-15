@@ -12,6 +12,8 @@ export const FUND_SOURCES = [
   { value: 'SH', label: 'Slaughter House' },
   { value: 'TF', label: 'Trust Fund Proper' },
   { value: 'PO', label: 'Peace and Order' },
+  { value: 'SEF', label: 'Special Education Fund' },
+  { value: 'AICS', label: 'Assistance to Individuals in Crisis Situation' },
 ] as const
 
 export type FundSourceValue = (typeof FUND_SOURCES)[number]['value']
