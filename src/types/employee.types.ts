@@ -11,6 +11,9 @@ export const EMPLOYMENT_STATUSES = [
   'Probationary',
   'Appointed',
   'Teachers',
+  'ALS',
+  'DayCare Workers',
+  'STEPHEN',
 ] as const
 
 export type EmploymentStatus = (typeof EMPLOYMENT_STATUSES)[number]
