@@ -69,10 +69,7 @@ const userInitials = computed(() => {
 const MENU_GROUPS = [
   {
     label: 'General',
-    items: [
-      { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-      // { title: 'Payroll', url: '/payroll', icon: Layers },
-    ],
+    items: [{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard }],
   },
   {
     label: 'Payroll',
@@ -90,15 +87,29 @@ const MENU_GROUPS = [
       { title: 'Banks & Accounts', url: '/banks', icon: Landmark },
     ],
   },
-  // {
-  //   label: 'Finance',
-  //   items: [{ title: 'Banks & Accounts', url: '/finance/banks', icon: Landmark }],
-  // },
   {
     label: 'System',
     items: [{ title: 'Audit Logs', url: '/audit-logs', icon: ClipboardList }],
   },
 ]
+
+function canShowRoute(url: string): boolean {
+  const routeRecord = router.getRoutes().find((r) => r.path === url)
+  if (routeRecord?.meta?.roles) {
+    return authStore.userHasRole(routeRecord.meta.roles)
+  }
+  return true
+}
+
+const menuGroups = computed(() => {
+  return MENU_GROUPS.map((group) => {
+    const filteredItems = group.items.filter((item) => canShowRoute(item.url))
+    return {
+      ...group,
+      items: filteredItems,
+    }
+  }).filter((group) => group.items.length > 0)
+})
 
 async function handleLogout() {
   await authStore.logout()
@@ -113,7 +124,7 @@ async function handleLogout() {
     </SidebarHeader>
 
     <SidebarContent>
-      <SidebarGroup v-for="group in MENU_GROUPS" :key="group.label">
+      <SidebarGroup v-for="group in menuGroups" :key="group.label">
         <SidebarGroupLabel v-if="state === 'expanded'">{{ group.label }}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
@@ -172,7 +183,7 @@ async function handleLogout() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem as-child class="cursor-pointer">
+              <DropdownMenuItem v-if="canShowRoute('/settings')" as-child class="cursor-pointer">
                 <RouterLink to="/settings" class="flex w-full items-center">
                   <Settings class="mr-2 size-4" />
                   <span>Settings</span>

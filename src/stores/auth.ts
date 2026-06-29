@@ -13,14 +13,16 @@ import {
   getUserProfile,
   updateUserProfile,
 } from '@/services/auth.service'
-import type { UserProfile } from '@/types/user.types'
+import type { UserProfile, UserProfileWithRole } from '@/types/user.types'
+import { UserRole } from '@/types/user.types'
+import type { UserRoleType } from '@/types/user.types'
 
 export const useAuthStore = defineStore('auth', () => {
   // ─── State ─────────────────────────────────────────────────────────────────
 
   const user = ref<User | null>(null)
   const session = ref<Session | null>(null)
-  const profile = ref<UserProfile | null>(null)
+  const profile = ref<UserProfileWithRole | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -37,6 +39,31 @@ export const useAuthStore = defineStore('auth', () => {
 
     return Boolean(p.first_name && p.last_name && p.phone_number)
   })
+
+  // ─── Role Getters ─────────────────────────────────────────────────────────
+
+  const userRole = computed(() => profile.value?.role ?? null)
+  const userRoleId = computed(() => profile.value?.role_id ?? null)
+
+  const isAdmin = computed(() => userRoleId.value === UserRole.ADMIN)
+  const isAccounting = computed(() => userRoleId.value === UserRole.ACCOUNTING)
+  const isCashierLBP = computed(() => userRoleId.value === UserRole.CASHIER_LBP)
+  const isCashierDBP = computed(() => userRoleId.value === UserRole.CASHIER_DBP)
+
+  /**
+   * Check if the current user has a specific role or one of several roles.
+   * @param roleIds - A single UserRole or an array of UserRole values.
+   */
+  function userHasRole(roleIds: UserRoleType): boolean {
+    const currentRoleId = userRoleId.value
+    if (currentRoleId === null) return false
+
+    if (Array.isArray(roleIds)) {
+      return roleIds.includes(currentRoleId)
+    }
+
+    return currentRoleId === roleIds
+  }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -219,6 +246,14 @@ export const useAuthStore = defineStore('auth', () => {
     userEmail,
     userId,
     isProfileComplete,
+    // role getters
+    userRole,
+    userRoleId,
+    isAdmin,
+    isAccounting,
+    isCashierLBP,
+    isCashierDBP,
+    userHasRole,
     // actions
     initialize,
     login,

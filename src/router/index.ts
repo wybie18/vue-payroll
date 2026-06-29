@@ -56,6 +56,12 @@ router.beforeEach(async (to, from) => {
     return { name: 'Dashboard' }
   }
 
+  if (to.meta.roles && isAuthenticated) {
+    if (!authStore.userHasRole(to.meta.roles)) {
+      return { name: 'Dashboard' }
+    }
+  }
+
   return true
 })
 

@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import type { ServiceResponse } from '@/types/response.types'
-import type { UserProfile } from '@/types/user.types'
+import type { UserProfile, UserProfileWithRole } from '@/types/user.types'
 import type { AuthError, Session, User } from '@supabase/supabase-js'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -57,24 +57,28 @@ export async function getCurrentUser(): Promise<AuthResponse<User | null>> {
   return { data: user, error }
 }
 
-export async function getUserProfile(userId: string): Promise<ServiceResponse<UserProfile | null>> {
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+export async function getUserProfile(userId: string): Promise<ServiceResponse<UserProfileWithRole | null>> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*, role:l_roles!role_id(id, role_name)')
+    .eq('id', userId)
+    .maybeSingle()
 
-  return { data, error }
+  return { data: data as UserProfileWithRole | null, error }
 }
 
 export async function updateUserProfile(
   userId: string,
   updates: Partial<UserProfile>,
-): Promise<ServiceResponse<UserProfile | null>> {
+): Promise<ServiceResponse<UserProfileWithRole | null>> {
   const { data, error } = await supabase
     .from('profiles')
     .update(updates)
     .eq('id', userId)
-    .select()
+    .select('*, role:l_roles!role_id(id, role_name)')
     .single()
 
-  return { data, error }
+  return { data: data as UserProfileWithRole | null, error }
 }
 
 // ─── Password Reset ───────────────────────────────────────────────────────────
