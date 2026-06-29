@@ -52,8 +52,6 @@ export function useAdaCsvExport(adaId: Ref<number | null>, adaNumber: Ref<string
     }
 
     const rows: (string | number)[][] = [
-      ['Account Number', 'Name', 'Amount'],
-      // Employee rows
       ...data.employees.map((emp) => [
         formatAccountNo(emp.account_no),
         formatName(emp.name),
