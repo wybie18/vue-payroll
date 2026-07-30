@@ -33,7 +33,7 @@ const {
   addPayrollPeriod,
   editPayrollPeriod,
   removePayrollPeriod,
-} = usePayrollPeriods()
+} = usePayrollPeriods({ autoFetch: true })
 
 const {
   formOpen,

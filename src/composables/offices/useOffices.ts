@@ -13,7 +13,24 @@ import { toast } from 'vue-sonner'
  * totalCount is tracked heuristically — we know if a full page came back
  * there may be more pages. Replace with a count query if the API adds one.
  */
-export function useOffices() {
+// ─── Module-scoped shared state for lookups ───────────────────────────────────
+const allOffices = ref<Office[]>([])
+let allOfficesFetched = false
+let fetchAllOfficesPromise: Promise<void> | null = null
+
+export function clearOfficesCache() {
+  allOffices.value = []
+  allOfficesFetched = false
+  fetchAllOfficesPromise = null
+}
+
+export interface UseOfficesOptions {
+  autoFetch?: boolean
+}
+
+export function useOffices(options: UseOfficesOptions = {}) {
+  const { autoFetch = false } = options
+
   // ─── List state ─────────────────────────────────────────────────────────────
 
   const offices = ref<Office[]>([])
@@ -22,7 +39,6 @@ export function useOffices() {
   const search = ref('')
   const page = ref(1)
   const pageSize = ref(10)
-  const allOffices = ref<Office[]>([])
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
 
@@ -48,14 +64,28 @@ export function useOffices() {
     isLoading.value = false
   }
 
-  async function fetchAllOffices() {
-    const { data, error } = await getAllOffices()
-    if (error) {
-      console.error('[useOffices] fetchAll:', error.message)
-      toast.error('Failed to load all offices')
-    } else {
-      allOffices.value = data
+  async function fetchAllOffices(force = false) {
+    if (allOfficesFetched && !force) {
+      return
     }
+
+    if (fetchAllOfficesPromise) {
+      return fetchAllOfficesPromise
+    }
+
+    fetchAllOfficesPromise = (async () => {
+      const { data, error } = await getAllOffices()
+      if (error) {
+        console.error('[useOffices] fetchAll:', error.message)
+        toast.error('Failed to load all offices')
+      } else {
+        allOffices.value = data
+        allOfficesFetched = true
+      }
+      fetchAllOfficesPromise = null
+    })()
+
+    return fetchAllOfficesPromise
   }
 
   // Re-fetch when page or pageSize changes
@@ -74,8 +104,10 @@ export function useOffices() {
     { debounce: 300 },
   )
 
-  // Initial load
-  fetchOffices()
+  // Initial load only if autoFetch is explicitly requested
+  if (autoFetch) {
+    fetchOffices()
+  }
 
   // ─── CRUD handlers ──────────────────────────────────────────────────────────
 
@@ -98,7 +130,7 @@ export function useOffices() {
         description: 'Failed to create office.',
       })
     } else {
-      await fetchOffices()
+      await Promise.all([fetchOffices(), fetchAllOffices(true)])
       toast.success('Office successfully created!')
     }
   }
@@ -122,7 +154,7 @@ export function useOffices() {
         description: 'Failed to update office.',
       })
     } else {
-      await fetchOffices()
+      await Promise.all([fetchOffices(), fetchAllOffices(true)])
       toast.success('Office successfully updated!')
     }
   }
@@ -135,7 +167,7 @@ export function useOffices() {
         description: 'Failed to delete office.',
       })
     } else {
-      await fetchOffices()
+      await Promise.all([fetchOffices(), fetchAllOffices(true)])
       toast.success('Office successfully deleted!')
     }
   }
@@ -154,7 +186,7 @@ export function useOffices() {
       })
       return false
     } else {
-      await fetchOffices()
+      await Promise.all([fetchOffices(), fetchAllOffices(true)])
       toast.success('Offices successfully imported!')
       return true
     }
@@ -176,5 +208,6 @@ export function useOffices() {
     bulkImportOffices,
     fetchOffices,
     fetchAllOffices,
+    clearOfficesCache,
   }
 }

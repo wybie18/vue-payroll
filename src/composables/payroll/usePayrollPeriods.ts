@@ -4,11 +4,29 @@ import {
   createPayrollPeriod,
   updatePayrollPeriod,
   deletePayrollPeriod,
+  getAllPayrollPeriods,
 } from '@/services/payroll-period.service'
 import type { PayrollPeriod, CompensationType } from '@/types/payroll-period.types'
 import { toast } from 'vue-sonner'
 
-export function usePayrollPeriods() {
+// ─── Module-scoped shared state for lookups ───────────────────────────────────
+const allPayrollPeriods = ref<PayrollPeriod[]>([])
+let allPayrollPeriodsFetched = false
+let fetchAllPayrollPeriodsPromise: Promise<void> | null = null
+
+export function clearPayrollPeriodsCache() {
+  allPayrollPeriods.value = []
+  allPayrollPeriodsFetched = false
+  fetchAllPayrollPeriodsPromise = null
+}
+
+export interface UsePayrollPeriodsOptions {
+  autoFetch?: boolean
+}
+
+export function usePayrollPeriods(options: UsePayrollPeriodsOptions = {}) {
+  const { autoFetch = false } = options
+
   const payrollPeriods = ref<PayrollPeriod[]>([])
   const totalCount = ref(0)
   const isLoading = ref(false)
@@ -46,6 +64,30 @@ export function usePayrollPeriods() {
     isLoading.value = false
   }
 
+  async function fetchAllPayrollPeriods(force = false) {
+    if (allPayrollPeriodsFetched && !force) {
+      return
+    }
+
+    if (fetchAllPayrollPeriodsPromise) {
+      return fetchAllPayrollPeriodsPromise
+    }
+
+    fetchAllPayrollPeriodsPromise = (async () => {
+      const { data, error } = await getAllPayrollPeriods()
+      if (error) {
+        console.error('[usePayrollPeriods] fetchAll:', error.message)
+        toast.error('Failed to load all payroll periods')
+      } else {
+        allPayrollPeriods.value = data
+        allPayrollPeriodsFetched = true
+      }
+      fetchAllPayrollPeriodsPromise = null
+    })()
+
+    return fetchAllPayrollPeriodsPromise
+  }
+
   // Watch pagination parameters
   watch([page, pageSize], fetchPayrollPeriods)
 
@@ -58,8 +100,10 @@ export function usePayrollPeriods() {
     }
   })
 
-  // Initial fetch
-  fetchPayrollPeriods()
+  // Initial fetch only if autoFetch is explicitly requested
+  if (autoFetch) {
+    fetchPayrollPeriods()
+  }
 
   async function addPayrollPeriod(
     cutoff_start: string,
@@ -80,7 +124,7 @@ export function usePayrollPeriods() {
         description: 'Failed to create payroll period.',
       })
     } else {
-      await fetchPayrollPeriods()
+      await Promise.all([fetchPayrollPeriods(), fetchAllPayrollPeriods(true)])
       toast.success('Payroll period successfully created!')
     }
   }
@@ -104,7 +148,7 @@ export function usePayrollPeriods() {
         description: 'Failed to update payroll period.',
       })
     } else {
-      await fetchPayrollPeriods()
+      await Promise.all([fetchPayrollPeriods(), fetchAllPayrollPeriods(true)])
       toast.success('Payroll period successfully updated!')
     }
   }
@@ -117,13 +161,14 @@ export function usePayrollPeriods() {
         description: 'Failed to delete payroll period.',
       })
     } else {
-      await fetchPayrollPeriods()
+      await Promise.all([fetchPayrollPeriods(), fetchAllPayrollPeriods(true)])
       toast.success('Payroll period successfully deleted!')
     }
   }
 
   return {
     payrollPeriods,
+    allPayrollPeriods,
     totalCount,
     isLoading,
     startDate,
@@ -136,5 +181,7 @@ export function usePayrollPeriods() {
     editPayrollPeriod,
     removePayrollPeriod,
     fetchPayrollPeriods,
+    fetchAllPayrollPeriods,
+    clearPayrollPeriodsCache,
   }
 }

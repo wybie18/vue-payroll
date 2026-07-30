@@ -22,7 +22,7 @@ const {
   editBankAccount,
   removeBankAccount,
   bulkImportBankAccounts,
-} = useBankAccounts()
+} = useBankAccounts({ autoFetch: true })
 
 const importOpen = ref(false)
 

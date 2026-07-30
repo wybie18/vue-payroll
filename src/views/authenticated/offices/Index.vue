@@ -36,7 +36,7 @@ const {
   editOffice,
   removeOffice,
   bulkImportOffices,
-} = useOffices()
+} = useOffices({ autoFetch: true })
 
 const importOpen = ref(false)
 

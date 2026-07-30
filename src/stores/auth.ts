@@ -72,11 +72,15 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function setAuthData(newUser: User | null, newSession: Session | null) {
+    const isSameUser = !!newUser && newUser.id === user.value?.id
+
     user.value = newUser
     session.value = newSession
 
     if (newUser) {
-      await fetchUserProfile(newUser.id)
+      if (!isSameUser || !profile.value) {
+        await fetchUserProfile(newUser.id)
+      }
     } else {
       profile.value = null
     }

@@ -41,8 +41,8 @@ import {
   type PayrollAdaFormErrors,
 } from '@/validators/payroll-ada.validators'
 
+import PayrollPeriodSelect from '@/components/ui/custom/PayrollPeriodSelect.vue'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
-import { usePayrollPeriods } from '@/composables/payroll/usePayrollPeriods'
 import { COMPENSATION_LABELS } from '@/helpers/constants'
 
 function formatCompensationType(type?: string | null): string {
@@ -68,7 +68,6 @@ const emit = defineEmits<{
 }>()
 
 const { allAccountsWithBank, fetchAllAccountsWithBank } = useBankAccounts()
-const { payrollPeriods, fetchPayrollPeriods } = usePayrollPeriods()
 
 const form = ref({
   payroll_period_id: null as number | null,
@@ -86,37 +85,40 @@ const errors = ref<PayrollAdaFormErrors>({
 
 const isEdit = ref(false)
 
-const openPeriodPopover = ref(false)
 const openBankPopover = ref(false)
 
-watch([() => props.open, () => props.row], ([isOpen]) => {
-  if (isOpen) {
-    Promise.all([fetchAllAccountsWithBank(), fetchPayrollPeriods()])
-    if (props.row) {
-      isEdit.value = true
-      form.value = {
-        payroll_period_id: props.row.payroll_period_id,
-        bank_account_id: props.row.bank_account_id,
-        ada_date: props.row.ada_date,
-        status: props.row.status,
+watch(
+  [() => props.open, () => props.row],
+  async ([isOpen, val]) => {
+    if (isOpen) {
+      await fetchAllAccountsWithBank()
+      if (val) {
+        isEdit.value = true
+        form.value = {
+          payroll_period_id: val.payroll_period_id,
+          bank_account_id: val.bank_account_id,
+          ada_date: val.ada_date,
+          status: val.status,
+        }
+      } else {
+        isEdit.value = false
+        form.value = {
+          payroll_period_id: null,
+          bank_account_id: null,
+          ada_date: '',
+          status: 'Prepared',
+        }
       }
-    } else {
-      isEdit.value = false
-      form.value = {
-        payroll_period_id: null,
-        bank_account_id: null,
-        ada_date: todayString(),
-        status: 'Prepared',
+      errors.value = {
+        payroll_period_id: '',
+        bank_account_id: '',
+        ada_date: '',
+        status: '',
       }
     }
-    errors.value = {
-      payroll_period_id: '',
-      bank_account_id: '',
-      ada_date: '',
-      status: '',
-    }
-  }
-})
+  },
+  { immediate: true },
+)
 
 const handleSubmit = () => {
   const validation = validatePayrollAdaForm(
@@ -176,85 +178,12 @@ const handleSubmit = () => {
         <!-- Payroll Period -->
         <div class="grid gap-2">
           <Label>Payroll Period <span class="text-destructive">*</span></Label>
-          <Popover v-model:open="openPeriodPopover">
-            <PopoverTrigger as-child>
-              <Button
-                variant="outline"
-                role="combobox"
-                :aria-expanded="openPeriodPopover"
-                class="w-full justify-between"
-                :class="!form.payroll_period_id && 'text-muted-foreground'"
-                :title="
-                  form.payroll_period_id
-                    ? (payrollPeriods.find((x) => x.payroll_period_id === form.payroll_period_id)
-                        ?.description ?? 'No description')
-                    : undefined
-                "
-              >
-                <span class="truncate">
-                  {{
-                    form.payroll_period_id
-                      ? (() => {
-                          const p = payrollPeriods.find(
-                            (x) => x.payroll_period_id === form.payroll_period_id,
-                          )
-                          if (!p) return 'Unknown Period'
-                          const range = formatDateRange(p.cutoff_start, p.cutoff_end)
-                          const compType = formatCompensationType(p.compensation_type)
-                          return compType ? `${range} (${compType})` : range
-                        })()
-                      : 'Select payroll period...'
-                  }}
-                </span>
-                <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-80 p-0">
-              <Command>
-                <CommandInput placeholder="Search period..." />
-                <CommandEmpty>No period found.</CommandEmpty>
-                <CommandList>
-                  <CommandGroup>
-                    <CommandItem
-                      v-for="period in payrollPeriods"
-                      :key="period.payroll_period_id"
-                      :value="`${formatDateRange(period.cutoff_start, period.cutoff_end)} ${formatCompensationType(period.compensation_type)} ${period.description || ''}`"
-                      :title="period.description || 'No description'"
-                      class="flex items-center justify-between py-2"
-                      @select="
-                        () => {
-                          form.payroll_period_id = period.payroll_period_id
-                          openPeriodPopover = false
-                        }
-                      "
-                    >
-                      <div class="flex items-center gap-2 overflow-hidden">
-                        <Check
-                          :class="
-                            cn(
-                              'h-4 w-4 shrink-0',
-                              form.payroll_period_id === period.payroll_period_id
-                                ? 'opacity-100'
-                                : 'opacity-0',
-                            )
-                          "
-                        />
-                        <span class="font-medium truncate">
-                          {{ formatDateRange(period.cutoff_start, period.cutoff_end) }}
-                        </span>
-                      </div>
-                      <span
-                        v-if="period.compensation_type"
-                        class="ml-2 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary capitalize"
-                      >
-                        {{ formatCompensationType(period.compensation_type) }}
-                      </span>
-                    </CommandItem>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <PayrollPeriodSelect
+            v-model="form.payroll_period_id"
+            placeholder="Select payroll period..."
+            trigger-class="w-full"
+            :clearable="false"
+          />
           <span v-if="errors.payroll_period_id" class="text-sm text-destructive">{{
             errors.payroll_period_id
           }}</span>

@@ -41,8 +41,8 @@ import {
 import Pagination from '@/components/ui/custom/data-table/Pagination.vue'
 import ViewOptions from '@/components/ui/custom/data-table/ViewOptions.vue'
 
+import PayrollPeriodSelect from '@/components/ui/custom/PayrollPeriodSelect.vue'
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
-import { usePayrollPeriods } from '@/composables/payroll/usePayrollPeriods'
 import { formatDateRange } from '@/helpers/date.helper'
 import { Input } from '@/components/ui/input'
 import { COMPENSATION_LABELS } from '@/helpers/constants'
@@ -112,14 +112,12 @@ const localSearch = computed({
   set: (val) => emit('update:search', val),
 })
 
-const openPeriodPopover = ref(false)
 const openBankPopover = ref(false)
 
 const { allAccountsWithBank, fetchAllAccountsWithBank } = useBankAccounts()
-const { payrollPeriods, fetchPayrollPeriods } = usePayrollPeriods()
 
 onMounted(async () => {
-  await Promise.all([fetchAllAccountsWithBank(), fetchPayrollPeriods()])
+  await Promise.all([fetchAllAccountsWithBank()])
 })
 
 // ─── UI-only table state ──────────────────────────────────────────────────────
@@ -207,88 +205,11 @@ const table = useVueTable({
           <Input v-model="localSearch" placeholder="Search ADA number..." class="h-8 pl-8" />
         </div>
         <!-- Payroll Period Filter -->
-        <Popover v-model:open="openPeriodPopover">
-          <PopoverTrigger as-child>
-            <Button
-              variant="outline"
-              role="combobox"
-              :aria-expanded="openPeriodPopover"
-              class="h-8 justify-between min-w-55"
-              :class="!localPayrollPeriodId && 'text-muted-foreground'"
-              :title="
-                localPayrollPeriodId
-                  ? (payrollPeriods.find((x) => x.payroll_period_id === localPayrollPeriodId)
-                      ?.description ?? 'No description')
-                  : undefined
-              "
-            >
-              <span class="truncate">
-                {{
-                  localPayrollPeriodId
-                    ? (() => {
-                        const p = payrollPeriods.find(
-                          (x) => x.payroll_period_id === localPayrollPeriodId,
-                        )
-                        if (!p) return 'Unknown Period'
-                        const range = formatDateRange(p.cutoff_start, p.cutoff_end)
-                        const compType = formatCompensationType(p.compensation_type)
-                        return compType ? `${range} (${compType})` : range
-                      })()
-                    : 'Filter by period...'
-                }}
-              </span>
-              <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent class="w-80 p-0">
-            <Command>
-              <CommandInput placeholder="Search period..." />
-              <CommandEmpty>No period found.</CommandEmpty>
-              <CommandList>
-                <CommandGroup>
-                  <CommandItem
-                    v-for="period in payrollPeriods"
-                    :key="period.payroll_period_id"
-                    :value="`${formatDateRange(period.cutoff_start, period.cutoff_end)} ${formatCompensationType(period.compensation_type)} ${period.description || ''}`"
-                    :title="period.description || 'No description'"
-                    class="flex items-center justify-between py-2"
-                    @select="
-                      () => {
-                        localPayrollPeriodId =
-                          localPayrollPeriodId === period.payroll_period_id
-                            ? null
-                            : period.payroll_period_id
-                        openPeriodPopover = false
-                      }
-                    "
-                  >
-                    <div class="flex items-center gap-2 overflow-hidden">
-                      <Check
-                        :class="
-                          cn(
-                            'h-4 w-4 shrink-0',
-                            localPayrollPeriodId === period.payroll_period_id
-                              ? 'opacity-100'
-                              : 'opacity-0',
-                          )
-                        "
-                      />
-                      <span class="font-medium truncate">
-                        {{ formatDateRange(period.cutoff_start, period.cutoff_end) }}
-                      </span>
-                    </div>
-                    <span
-                      v-if="period.compensation_type"
-                      class="ml-2 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary capitalize"
-                    >
-                      {{ formatCompensationType(period.compensation_type) }}
-                    </span>
-                  </CommandItem>
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <PayrollPeriodSelect
+          v-model="localPayrollPeriodId"
+          placeholder="Filter by period..."
+          trigger-class="h-8 min-w-55"
+        />
 
         <!-- Bank Account Filter -->
         <Popover v-model:open="openBankPopover">

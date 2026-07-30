@@ -11,7 +11,24 @@ import {
 import type { AccountWithBank, BankAccount } from '@/types/bank.types'
 import { toast } from 'vue-sonner'
 
-export function useBankAccounts() {
+// ─── Module-scoped shared state for lookups ───────────────────────────────────
+const allAccountsWithBank = ref<AccountWithBank[]>([])
+let allAccountsFetched = false
+let fetchAllAccountsPromise: Promise<void> | null = null
+
+export function clearBankAccountsCache() {
+  allAccountsWithBank.value = []
+  allAccountsFetched = false
+  fetchAllAccountsPromise = null
+}
+
+export interface UseBankAccountsOptions {
+  autoFetch?: boolean
+}
+
+export function useBankAccounts(options: UseBankAccountsOptions = {}) {
+  const { autoFetch = false } = options
+
   const bankAccounts = ref<AccountWithBank[]>([])
   const totalCount = ref(0)
   const isLoading = ref(false)
@@ -19,7 +36,6 @@ export function useBankAccounts() {
   const bankId = ref<number | null>(null)
   const page = ref(1)
   const pageSize = ref(10)
-  const allAccountsWithBank = ref<AccountWithBank[]>([])
 
   async function fetchBankAccounts() {
     isLoading.value = true
@@ -44,14 +60,28 @@ export function useBankAccounts() {
     isLoading.value = false
   }
 
-  async function fetchAllAccountsWithBank() {
-    const { data, error } = await getAllBankAccountWithBank()
-    if (error) {
-      console.error('[useBankAccounts] fetchAllAccountsWithBank:', error.message)
-      toast.error('Failed to load all bank accounts')
-    } else {
-      allAccountsWithBank.value = data
+  async function fetchAllAccountsWithBank(force = false) {
+    if (allAccountsFetched && !force) {
+      return
     }
+
+    if (fetchAllAccountsPromise) {
+      return fetchAllAccountsPromise
+    }
+
+    fetchAllAccountsPromise = (async () => {
+      const { data, error } = await getAllBankAccountWithBank()
+      if (error) {
+        console.error('[useBankAccounts] fetchAllAccountsWithBank:', error.message)
+        toast.error('Failed to load all bank accounts')
+      } else {
+        allAccountsWithBank.value = data
+        allAccountsFetched = true
+      }
+      fetchAllAccountsPromise = null
+    })()
+
+    return fetchAllAccountsPromise
   }
 
   // Re-fetch when page or pageSize changes
@@ -79,8 +109,10 @@ export function useBankAccounts() {
     { debounce: 300 },
   )
 
-  // Initial load
-  fetchBankAccounts()
+  // Initial load only if autoFetch is explicitly requested
+  if (autoFetch) {
+    fetchBankAccounts()
+  }
 
   async function addBankAccount(
     bank_id: number,
@@ -99,7 +131,7 @@ export function useBankAccounts() {
         description: 'Failed to create bank account.',
       })
     } else {
-      await fetchBankAccounts()
+      await Promise.all([fetchBankAccounts(), fetchAllAccountsWithBank(true)])
       toast.success('Bank account successfully created!')
     }
   }
@@ -121,7 +153,7 @@ export function useBankAccounts() {
         description: 'Failed to update bank account.',
       })
     } else {
-      await fetchBankAccounts()
+      await Promise.all([fetchBankAccounts(), fetchAllAccountsWithBank(true)])
       toast.success('Bank account successfully updated!')
     }
   }
@@ -134,7 +166,7 @@ export function useBankAccounts() {
         description: 'Failed to delete bank account.',
       })
     } else {
-      await fetchBankAccounts()
+      await Promise.all([fetchBankAccounts(), fetchAllAccountsWithBank(true)])
       toast.success('Bank account successfully deleted!')
     }
   }
@@ -153,7 +185,7 @@ export function useBankAccounts() {
       })
       return false
     } else {
-      await fetchBankAccounts()
+      await Promise.all([fetchBankAccounts(), fetchAllAccountsWithBank(true)])
       toast.success('Bank accounts successfully imported!')
       return true
     }
@@ -174,5 +206,6 @@ export function useBankAccounts() {
     bulkImportBankAccounts,
     fetchBankAccounts,
     fetchAllAccountsWithBank,
+    clearBankAccountsCache,
   }
 }
