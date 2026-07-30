@@ -65,6 +65,8 @@ export async function listPayrollPeriods({
   pageSize = 10,
   startDate = null,
   endDate = null,
+  compensation_type = null,
+  search = '',
 }: ListPayrollPeriodsParams = {}): Promise<PaginatedResponse<PayrollPeriod>> {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -81,6 +83,14 @@ export async function listPayrollPeriods({
 
   if (endDate) {
     query = query.lte('cutoff_end', endDate)
+  }
+
+  if (compensation_type) {
+    query = query.eq('compensation_type', compensation_type)
+  }
+
+  if (search && search.trim()) {
+    query = query.ilike('description', `%${search.trim()}%`)
   }
 
   const { data, count, error } = await query

@@ -30,3 +30,21 @@ export const formatDate = (value: string | null | undefined): string => {
     day: 'numeric',
   })
 }
+
+export const formatDateRange = (
+  start: string | null | undefined,
+  end: string | null | undefined
+): string => {
+  if (!start || !end) return 'N/A'
+
+  const startDate = new Date(start)
+  const endDate = new Date(end)
+
+  const formatter = new Intl.DateTimeFormat('en-PH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+
+  return formatter.formatRange(startDate, endDate)
+}

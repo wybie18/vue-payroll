@@ -3,8 +3,8 @@
  * (spaces, dashes, dots, slashes, etc.), leaving only digits.
  *
  * @example
- * formatAccountNo('0845-0150-330 84') // '0845015033084'
- * formatAccountNo('00524.034.8454')   // '005240348454'
+ * formatAccountNo('1234-5678-123 22') // '1234567812322'
+ * formatAccountNo('00123.456.7890')   // '001234567890'
  */
 export function formatAccountNo(accountNo: string): string {
   return accountNo.replace(/\D/g, '')
@@ -29,10 +29,22 @@ export function formatName(name: string): string {
     .toUpperCase()
     .replace(/Ñ/g, 'N')
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // strip remaining accent marks (é, á, etc.)
-    .replace(/[^A-Z0-9,.\s]/g, ' ') // anything not letter/number/comma/period/space → space
-    .replace(/\s+/g, ' ') // collapse multiple spaces
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Z0-9,.\s]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim()
+}
+
+export function formatNameForCsv(name: string): string {
+  return name
+    .toUpperCase()
+    .replace(/Ñ/g, 'N')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Z0-9,.\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/[,.]/g, '')
 }
 
 /**

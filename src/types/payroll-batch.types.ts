@@ -1,16 +1,19 @@
+import type { CompensationType } from './payroll-period.types'
+
 export interface PayrollBatch {
   batch_id: number
   payroll_period_id: number
   office_id: number | null
   bank_account_id: number | null
   batch_code: string
-  description: string | null
   status: string
   created_at: string | null
   updated_at: string | null
 }
 
 export interface PayrollBatchWithRelations extends PayrollBatch {
+  description: string | null
+  compensation_type: CompensationType | null
   total_employees: number
   total_net_pay: number
   bank_abbreviation: string | null

@@ -76,14 +76,12 @@ export function usePayrollAdas() {
     bankAccountId: number,
     adaDate: string,
     statusVal: string,
-    compensationType: PayrollAda['compensation_type'],
   ) {
     const { error } = await createPayrollAda({
       payroll_period_id: payrollPeriodId,
       bank_account_id: bankAccountId,
       ada_date: adaDate,
       status: statusVal,
-      compensation_type: compensationType,
     })
 
     if (error) {
@@ -103,14 +101,12 @@ export function usePayrollAdas() {
     bankAccountId: number,
     adaDate: string,
     statusVal: string,
-    compensationType: PayrollAda['compensation_type'],
   ) {
     const { error } = await updatePayrollAda(id, {
       payroll_period_id: payrollPeriodId,
       bank_account_id: bankAccountId,
       ada_date: adaDate,
       status: statusVal,
-      compensation_type: compensationType,
     })
 
     if (error) {

@@ -20,6 +20,7 @@ export function mapPayrollAdaBatchWithRelations(row: any): PayrollAdaBatchWithRe
     ada_id: row.ada_id,
     batch_id: row.batch_id,
     batch_code: row.batch_code ?? '',
+    compensation_type: row.compensation_type ?? null,
     description: row.description ?? null,
     batch_status: row.batch_status ?? 'Pending',
     office_code: row.office_code ?? null,

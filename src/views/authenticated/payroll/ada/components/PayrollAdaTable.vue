@@ -43,8 +43,14 @@ import ViewOptions from '@/components/ui/custom/data-table/ViewOptions.vue'
 
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
 import { usePayrollPeriods } from '@/composables/payroll/usePayrollPeriods'
-import { formatDate } from '@/helpers/date.helper'
+import { formatDateRange } from '@/helpers/date.helper'
 import { Input } from '@/components/ui/input'
+import { COMPENSATION_LABELS } from '@/helpers/constants'
+
+function formatCompensationType(type?: string | null): string {
+  if (!type) return ''
+  return COMPENSATION_LABELS[type] || type
+}
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 
@@ -122,6 +128,7 @@ const sorting = ref<SortingState>([])
 const columnVisibility = useStorage<VisibilityState>('ada-table-column-visibility', {
   fund_source: false,
   total_batches: false,
+  description: false,
 })
 
 // ─── Derived: server-side page count ─────────────────────────────────────────
@@ -208,23 +215,32 @@ const table = useVueTable({
               :aria-expanded="openPeriodPopover"
               class="h-8 justify-between min-w-55"
               :class="!localPayrollPeriodId && 'text-muted-foreground'"
-            >
-              {{
+              :title="
                 localPayrollPeriodId
-                  ? (() => {
-                      const p = payrollPeriods.find(
-                        (x) => x.payroll_period_id === localPayrollPeriodId,
-                      )
-                      return p
-                        ? `${formatDate(p.cutoff_start)} - ${formatDate(p.cutoff_end)}`
-                        : 'Unknown Period'
-                    })()
-                  : 'Filter by period...'
-              }}
+                  ? (payrollPeriods.find((x) => x.payroll_period_id === localPayrollPeriodId)
+                      ?.description ?? 'No description')
+                  : undefined
+              "
+            >
+              <span class="truncate">
+                {{
+                  localPayrollPeriodId
+                    ? (() => {
+                        const p = payrollPeriods.find(
+                          (x) => x.payroll_period_id === localPayrollPeriodId,
+                        )
+                        if (!p) return 'Unknown Period'
+                        const range = formatDateRange(p.cutoff_start, p.cutoff_end)
+                        const compType = formatCompensationType(p.compensation_type)
+                        return compType ? `${range} (${compType})` : range
+                      })()
+                    : 'Filter by period...'
+                }}
+              </span>
               <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent class="w-75 p-0">
+          <PopoverContent class="w-80 p-0">
             <Command>
               <CommandInput placeholder="Search period..." />
               <CommandEmpty>No period found.</CommandEmpty>
@@ -233,7 +249,9 @@ const table = useVueTable({
                   <CommandItem
                     v-for="period in payrollPeriods"
                     :key="period.payroll_period_id"
-                    :value="period.payroll_period_id.toString()"
+                    :value="`${formatDateRange(period.cutoff_start, period.cutoff_end)} ${formatCompensationType(period.compensation_type)} ${period.description || ''}`"
+                    :title="period.description || 'No description'"
+                    class="flex items-center justify-between py-2"
                     @select="
                       () => {
                         localPayrollPeriodId =
@@ -244,17 +262,27 @@ const table = useVueTable({
                       }
                     "
                   >
-                    <Check
-                      :class="
-                        cn(
-                          'mr-2 h-4 w-4',
-                          localPayrollPeriodId === period.payroll_period_id
-                            ? 'opacity-100'
-                            : 'opacity-0',
-                        )
-                      "
-                    />
-                    {{ formatDate(period.cutoff_start) }} - {{ formatDate(period.cutoff_end) }}
+                    <div class="flex items-center gap-2 overflow-hidden">
+                      <Check
+                        :class="
+                          cn(
+                            'h-4 w-4 shrink-0',
+                            localPayrollPeriodId === period.payroll_period_id
+                              ? 'opacity-100'
+                              : 'opacity-0',
+                          )
+                        "
+                      />
+                      <span class="font-medium truncate">
+                        {{ formatDateRange(period.cutoff_start, period.cutoff_end) }}
+                      </span>
+                    </div>
+                    <span
+                      v-if="period.compensation_type"
+                      class="ml-2 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary capitalize"
+                    >
+                      {{ formatCompensationType(period.compensation_type) }}
+                    </span>
                   </CommandItem>
                 </CommandGroup>
               </CommandList>

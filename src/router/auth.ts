@@ -59,7 +59,7 @@ export const authRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/payroll/ada/:ada_number/:ada_id/:bank_account_id/batches',
+    path: '/payroll/ada/:ada_number/:ada_id/:bank_account_id/:payroll_period_id/batches',
     name: 'PayrollAdaBatches',
     component: () => import('@/views/authenticated/payroll/ada/batches/Index.vue'),
     meta: {

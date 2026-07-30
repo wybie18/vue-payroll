@@ -18,7 +18,7 @@ import { Plus } from '@lucide/vue'
 import { usePayrollBatchDialogs } from '@/composables/payroll/usePayrollBatchDialogs'
 import { usePayrollBatches } from '@/composables/payroll/usePayrollBatches'
 import type { PayrollBatchWithRelations } from '@/types/payroll-batch.types'
-import { payrollBatchColumns } from './components/PayrollBatchColumns.ts'
+import { payrollBatchColumns } from './components/PayrollBatchColumns'
 import PayrollBatchDeleteDialog from './components/PayrollBatchDeleteDialog.vue'
 import PayrollBatchMutateDrawer from './components/PayrollBatchMutateDrawer.vue'
 import PayrollBatchTable from './components/PayrollBatchTable.vue'
@@ -55,19 +55,17 @@ async function handleSubmit(data: {
   payroll_period_id: number
   office_id: number | null
   bank_account_id: number | null
-  description: string | null
 }) {
-  const { payroll_period_id, office_id, bank_account_id, description } = data
+  const { payroll_period_id, office_id, bank_account_id } = data
   if (selectedPayrollBatch.value) {
     await editPayrollBatch(
       selectedPayrollBatch.value.batch_id,
       payroll_period_id,
       office_id,
       bank_account_id,
-      description,
     )
   } else {
-    await addPayrollBatch(payroll_period_id, office_id, bank_account_id, description)
+    await addPayrollBatch(payroll_period_id, office_id, bank_account_id)
   }
 }
 

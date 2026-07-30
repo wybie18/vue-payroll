@@ -11,6 +11,7 @@ export interface PayrollAdaBatchWithRelations {
   ada_id: number
   batch_id: number
   batch_code: string
+  compensation_type: string | null
   description: string | null
   batch_status: string
   office_code: string | null

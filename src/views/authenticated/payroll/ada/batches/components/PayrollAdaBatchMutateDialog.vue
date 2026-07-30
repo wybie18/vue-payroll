@@ -12,11 +12,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { Loader2 } from '@lucide/vue'
 import { getPayrollBatchesWithNoAda } from '@/services/payroll-batch.service'
-import type { PayrollBatch } from '@/types/payroll-batch.types'
+import type { PayrollBatchWithRelations } from '@/types/payroll-batch.types'
+import CompensationBadge from '@/components/ui/custom/CompensationBadge.vue'
+import { COMPENSATION_LABELS } from '@/helpers/constants'
 
 const props = defineProps<{
   open: boolean
   bankAccountId: number
+  payrollPeriodId: number
 }>()
 
 const emit = defineEmits<{
@@ -24,7 +27,7 @@ const emit = defineEmits<{
   submit: [batchIds: number[]]
 }>()
 
-const allBatches = ref<PayrollBatch[]>([])
+const allBatches = ref<PayrollBatchWithRelations[]>([])
 const isLoadingBatches = ref(false)
 
 const selectedBatchIds = ref<number[]>([])
@@ -32,7 +35,7 @@ const errorText = ref('')
 
 const fetchUnassignedBatches = async () => {
   isLoadingBatches.value = true
-  const { data, error } = await getPayrollBatchesWithNoAda(props.bankAccountId)
+  const { data, error } = await getPayrollBatchesWithNoAda(props.bankAccountId, props.payrollPeriodId)
   if (!error && data) {
     allBatches.value = data
   }
@@ -137,6 +140,7 @@ const handleSubmit = () => {
                     />
                   </th>
                   <th class="p-3 text-start">Batch Code</th>
+                  <th class="p-3 text-start w-50">Type</th>
                   <th class="p-3 text-start">Description</th>
                   <th class="p-3 text-center w-25">Status</th>
                 </tr>
@@ -156,7 +160,14 @@ const handleSubmit = () => {
                       class="rounded border-slate-350 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
                     />
                   </td>
-                  <td class="p-3 font-semibold">{{ batch.batch_code }}</td>
+                  <td class="p-3 w-40 font-semibold">{{ batch.batch_code }}</td>
+                  <td class="p-3 max-w-10">
+                    <CompensationBadge
+                      :type="batch.compensation_type"
+                      variant="secondary"
+                      class="ml-2"
+                    />
+                  </td>
                   <td
                     class="p-3 text-muted-foreground truncate max-w-50"
                     :title="batch.description || ''"

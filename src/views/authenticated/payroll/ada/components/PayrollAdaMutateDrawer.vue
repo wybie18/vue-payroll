@@ -29,13 +29,13 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Check, ChevronsUpDown } from '@lucide/vue'
 import { cn } from '@/lib/utils'
-import { formatDate } from '@/helpers/date.helper'
+import { formatDate, formatDateRange } from '@/helpers/date.helper'
 import DatePicker from '@/components/ui/custom/DatePicker.vue'
 import { today, getLocalTimeZone } from '@internationalized/date'
 
 const todayString = () => today(getLocalTimeZone()).toString()
 
-import type { PayrollAda, PayrollAdaWithDetails } from '@/types/payroll-ada.types'
+import type { PayrollAdaWithDetails } from '@/types/payroll-ada.types'
 import {
   validatePayrollAdaForm,
   type PayrollAdaFormErrors,
@@ -43,6 +43,12 @@ import {
 
 import { useBankAccounts } from '@/composables/banks/useBankAccounts'
 import { usePayrollPeriods } from '@/composables/payroll/usePayrollPeriods'
+import { COMPENSATION_LABELS } from '@/helpers/constants'
+
+function formatCompensationType(type?: string | null): string {
+  if (!type) return ''
+  return COMPENSATION_LABELS[type] || type
+}
 
 const props = defineProps<{
   open: boolean
@@ -57,7 +63,6 @@ const emit = defineEmits<{
       bank_account_id: number
       ada_date: string
       status: string
-      compensation_type: PayrollAda['compensation_type']
     },
   ]
 }>()
@@ -70,7 +75,6 @@ const form = ref({
   bank_account_id: null as number | null,
   ada_date: '',
   status: 'Prepared',
-  compensation_type: '',
 })
 
 const errors = ref<PayrollAdaFormErrors>({
@@ -78,19 +82,7 @@ const errors = ref<PayrollAdaFormErrors>({
   bank_account_id: '',
   ada_date: '',
   status: '',
-  compensation_type: '',
 })
-
-const compensationTypeOpen = ref(false)
-const compensationTypes = [
-  { value: 'allowance', label: 'Allowance' },
-  { value: 'salary', label: 'Salary' },
-  { value: 'overtime', label: 'Overtime' },
-  { value: 'honorarium', label: 'Honorarium' },
-  { value: 'mixed', label: 'Mixed' },
-  { value: 'refund', label: 'Refund' },
-  { value: 'wages', label: 'Wages' },
-]
 
 const isEdit = ref(false)
 
@@ -107,7 +99,6 @@ watch([() => props.open, () => props.row], ([isOpen]) => {
         bank_account_id: props.row.bank_account_id,
         ada_date: props.row.ada_date,
         status: props.row.status,
-        compensation_type: props.row.compensation_type || '',
       }
     } else {
       isEdit.value = false
@@ -116,7 +107,6 @@ watch([() => props.open, () => props.row], ([isOpen]) => {
         bank_account_id: null,
         ada_date: todayString(),
         status: 'Prepared',
-        compensation_type: '',
       }
     }
     errors.value = {
@@ -124,7 +114,6 @@ watch([() => props.open, () => props.row], ([isOpen]) => {
       bank_account_id: '',
       ada_date: '',
       status: '',
-      compensation_type: '',
     }
   }
 })
@@ -135,7 +124,6 @@ const handleSubmit = () => {
     form.value.bank_account_id,
     form.value.ada_date,
     form.value.status,
-    form.value.compensation_type,
   )
   if (!validation.valid) {
     errors.value = validation.errors
@@ -147,7 +135,6 @@ const handleSubmit = () => {
     bank_account_id: form.value.bank_account_id!,
     ada_date: form.value.ada_date,
     status: form.value.status,
-    compensation_type: form.value.compensation_type as PayrollAda['compensation_type'],
   })
   emit('update:open', false)
 }
@@ -197,6 +184,12 @@ const handleSubmit = () => {
                 :aria-expanded="openPeriodPopover"
                 class="w-full justify-between"
                 :class="!form.payroll_period_id && 'text-muted-foreground'"
+                :title="
+                  form.payroll_period_id
+                    ? (payrollPeriods.find((x) => x.payroll_period_id === form.payroll_period_id)
+                        ?.description ?? 'No description')
+                    : undefined
+                "
               >
                 <span class="truncate">
                   {{
@@ -205,9 +198,10 @@ const handleSubmit = () => {
                           const p = payrollPeriods.find(
                             (x) => x.payroll_period_id === form.payroll_period_id,
                           )
-                          return p
-                            ? `${formatDate(p.cutoff_start)} - ${formatDate(p.cutoff_end)}`
-                            : 'Unknown Period'
+                          if (!p) return 'Unknown Period'
+                          const range = formatDateRange(p.cutoff_start, p.cutoff_end)
+                          const compType = formatCompensationType(p.compensation_type)
+                          return compType ? `${range} (${compType})` : range
                         })()
                       : 'Select payroll period...'
                   }}
@@ -215,7 +209,7 @@ const handleSubmit = () => {
                 <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent class="p-0">
+            <PopoverContent class="w-80 p-0">
               <Command>
                 <CommandInput placeholder="Search period..." />
                 <CommandEmpty>No period found.</CommandEmpty>
@@ -224,7 +218,9 @@ const handleSubmit = () => {
                     <CommandItem
                       v-for="period in payrollPeriods"
                       :key="period.payroll_period_id"
-                      :value="period.payroll_period_id.toString()"
+                      :value="`${formatDateRange(period.cutoff_start, period.cutoff_end)} ${formatCompensationType(period.compensation_type)} ${period.description || ''}`"
+                      :title="period.description || 'No description'"
+                      class="flex items-center justify-between py-2"
                       @select="
                         () => {
                           form.payroll_period_id = period.payroll_period_id
@@ -232,17 +228,27 @@ const handleSubmit = () => {
                         }
                       "
                     >
-                      <Check
-                        :class="
-                          cn(
-                            'mr-2 h-4 w-4',
-                            form.payroll_period_id === period.payroll_period_id
-                              ? 'opacity-100'
-                              : 'opacity-0',
-                          )
-                        "
-                      />
-                      {{ formatDate(period.cutoff_start) }} - {{ formatDate(period.cutoff_end) }}
+                      <div class="flex items-center gap-2 overflow-hidden">
+                        <Check
+                          :class="
+                            cn(
+                              'h-4 w-4 shrink-0',
+                              form.payroll_period_id === period.payroll_period_id
+                                ? 'opacity-100'
+                                : 'opacity-0',
+                            )
+                          "
+                        />
+                        <span class="font-medium truncate">
+                          {{ formatDateRange(period.cutoff_start, period.cutoff_end) }}
+                        </span>
+                      </div>
+                      <span
+                        v-if="period.compensation_type"
+                        class="ml-2 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary capitalize"
+                      >
+                        {{ formatCompensationType(period.compensation_type) }}
+                      </span>
                     </CommandItem>
                   </CommandGroup>
                 </CommandList>
@@ -320,72 +326,8 @@ const handleSubmit = () => {
           }}</span>
         </div>
 
-        <!-- Compensation Type -->
-        <div class="grid gap-2">
-          <Label for="compensation-type"
-            >Compensation Type <span class="text-destructive">*</span></Label
-          >
-          <Popover v-model:open="compensationTypeOpen">
-            <PopoverTrigger as-child>
-              <Button
-                id="compensation-type"
-                variant="outline"
-                role="combobox"
-                :aria-expanded="compensationTypeOpen"
-                class="w-full justify-between"
-                :class="!form.compensation_type && 'text-muted-foreground'"
-              >
-                {{
-                  form.compensation_type
-                    ? compensationTypes.find((t) => t.value === form.compensation_type)?.label ||
-                      'Select type...'
-                    : 'Select compensation type...'
-                }}
-                <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-100 p-0">
-              <Command>
-                <CommandInput placeholder="Search compensation type..." />
-                <CommandEmpty>No compensation type found.</CommandEmpty>
-                <CommandList>
-                  <CommandGroup>
-                    <CommandItem
-                      v-for="typeOption in compensationTypes"
-                      :key="typeOption.value"
-                      :value="typeOption.label"
-                      @select="
-                        () => {
-                          form.compensation_type =
-                            form.compensation_type === typeOption.value ? '' : typeOption.value
-                          compensationTypeOpen = false
-                        }
-                      "
-                    >
-                      <Check
-                        :class="
-                          cn(
-                            'mr-2 h-4 w-4',
-                            form.compensation_type === typeOption.value
-                              ? 'opacity-100'
-                              : 'opacity-0',
-                          )
-                        "
-                      />
-                      {{ typeOption.label }}
-                    </CommandItem>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          <span v-if="errors.compensation_type" class="text-sm text-destructive">{{
-            errors.compensation_type
-          }}</span>
-        </div>
-
-        <!-- Status -->
-        <div class="grid gap-2">
+        <!-- Status (Edit mode only) -->
+        <div v-if="isEdit" class="grid gap-2">
           <Label for="status">Status <span class="text-destructive">*</span></Label>
           <Select v-model="form.status">
             <SelectTrigger>

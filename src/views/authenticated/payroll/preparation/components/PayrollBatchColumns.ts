@@ -2,16 +2,14 @@ import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { PayrollBatchWithRelations } from '@/types/payroll-batch.types'
 import ColumnHeader from '@/components/ui/custom/data-table/ColumnHeader.vue'
-import { formatDate } from '@/helpers/date.helper'
+import { formatDate, formatDateRange } from '@/helpers/date.helper'
 import DataTableRowActions from './DataTableRowActions.vue'
+import CompensationBadge from '@/components/ui/custom/CompensationBadge.vue'
 
 export const payrollBatchColumns: ColumnDef<PayrollBatchWithRelations>[] = [
   {
     accessorKey: 'batch_code',
     header: ({ column }) => h(ColumnHeader, { column, title: 'Batch Code' }),
-    meta: {
-      className: 'w-full',
-    },
     cell: ({ row, table }) =>
       h(
         'div',
@@ -28,10 +26,32 @@ export const payrollBatchColumns: ColumnDef<PayrollBatchWithRelations>[] = [
     header: ({ column }) => h(ColumnHeader, { column, title: 'Period' }),
     cell: ({ row }) => {
       const period = row.original.period
-      const displayText = period
-        ? `${formatDate(period.cutoff_start)} - ${formatDate(period.cutoff_end)}`
+      const displayText = period 
+        ? formatDateRange(period.cutoff_start, period.cutoff_end)
         : 'N/A'
       return h('div', { class: 'font-semibold text-muted-foreground' }, displayText)
+    },
+  },
+  {
+    accessorKey: 'compensation_type',
+    header: ({ column }) => h(ColumnHeader, { column, title: 'Type' }),
+    cell: ({ row }) => {
+      const type = row.getValue('compensation_type') as string | null
+      if (!type) return h('span', { class: 'text-muted-foreground' }, '—')
+      return h(CompensationBadge, { type })
+    },
+  },
+  {
+    accessorKey: 'description',
+    header: ({ column }) => h(ColumnHeader, { column, title: 'Description' }),
+    meta: {
+      className: 'w-full',
+    },
+    cell: ({ row }) => {
+      const desc = row.getValue('description') as string | null
+      return desc
+        ? h('div', { class: 'truncate max-w-[250px]', title: desc }, desc)
+        : h('span', { class: 'text-muted-foreground' }, 'No description')
     },
   },
   {

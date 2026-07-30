@@ -41,6 +41,7 @@ const route = useRoute()
 const adaNumber = computed(() => String(route.params.ada_number))
 const adaId = computed(() => Number(route.params.ada_id))
 const bankAccountId = computed(() => Number(route.params.bank_account_id))
+const payrollPeriodId = computed(() => Number(route.params.payroll_period_id))
 
 const { adaBatches, totalCount, isLoading, page, pageSize, addAdaBatches, removeAdaBatch } =
   usePayrollAdaBatches(adaId)
@@ -151,6 +152,7 @@ function handleShowEmployeePayroll(row: PayrollAdaBatchWithRelations) {
   <PayrollAdaBatchMutateDialog
     v-model:open="formOpen"
     :bank-account-id="bankAccountId"
+    :payroll-period-id="payrollPeriodId"
     @submit="handleSubmit"
   />
   <PayrollAdaBatchDeleteDialog

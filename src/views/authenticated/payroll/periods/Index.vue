@@ -16,7 +16,7 @@ import { Plus } from '@lucide/vue'
 
 import { usePayrollPeriodDialogs } from '@/composables/payroll/usePayrollPeriodDialogs'
 import { usePayrollPeriods } from '@/composables/payroll/usePayrollPeriods'
-import type { PayrollPeriod } from '@/types/payroll-period.types'
+import type { PayrollPeriod, CompensationType } from '@/types/payroll-period.types'
 import { payrollPeriodColumns } from './components/PayrollPeriodColumns.ts'
 import PayrollPeriodDeleteDialog from './components/PayrollPeriodDeleteDialog.vue'
 import PayrollPeriodMutateDrawer from './components/PayrollPeriodMutateDrawer.vue'
@@ -45,12 +45,23 @@ const {
   openDelete,
 } = usePayrollPeriodDialogs()
 
-async function handleSubmit(data: { cutoff_start: string; cutoff_end: string }) {
-  const { cutoff_start, cutoff_end } = data
+async function handleSubmit(data: {
+  cutoff_start: string
+  cutoff_end: string
+  description: string | null
+  compensation_type: CompensationType | null
+}) {
+  const { cutoff_start, cutoff_end, description, compensation_type } = data
   if (selectedPayrollPeriod.value) {
-    await editPayrollPeriod(selectedPayrollPeriod.value.payroll_period_id, cutoff_start, cutoff_end)
+    await editPayrollPeriod(
+      selectedPayrollPeriod.value.payroll_period_id,
+      cutoff_start,
+      cutoff_end,
+      description,
+      compensation_type,
+    )
   } else {
-    await addPayrollPeriod(cutoff_start, cutoff_end)
+    await addPayrollPeriod(cutoff_start, cutoff_end, description, compensation_type)
   }
 }
 

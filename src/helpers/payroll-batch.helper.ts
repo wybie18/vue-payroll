@@ -7,7 +7,6 @@ export function mapPayrollBatch(row: any): PayrollBatch {
     office_id: row.office_id ?? null,
     bank_account_id: row.bank_account_id ?? null,
     batch_code: row.batch_code,
-    description: row.description ?? null,
     status: row.status,
     created_at: row.created_at ?? null,
     updated_at: row.updated_at ?? null,
@@ -17,6 +16,8 @@ export function mapPayrollBatch(row: any): PayrollBatch {
 export function mapPayrollBatchesWithRelations(rows: any): PayrollBatchWithRelations {
   return {
     ...mapPayrollBatch(rows),
+    description: rows.description ?? null,
+    compensation_type: rows.compensation_type ?? null,
     period: {
       cutoff_start: rows.period?.cutoff_start ?? '',
       cutoff_end: rows.period?.cutoff_end ?? '',

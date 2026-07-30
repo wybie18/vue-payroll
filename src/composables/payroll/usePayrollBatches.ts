@@ -77,13 +77,11 @@ export function usePayrollBatches() {
     periodId: number,
     officeId: number | null,
     bankAccountId: number | null,
-    desc: string | null,
   ) {
     const { error } = await createPayrollBatch({
       payroll_period_id: periodId,
       office_id: officeId,
       bank_account_id: bankAccountId,
-      description: desc,
     })
 
     if (error) {
@@ -102,13 +100,11 @@ export function usePayrollBatches() {
     periodId: number,
     officeId: number | null,
     bankAccountId: number | null,
-    desc: string | null,
   ) {
     const { error } = await updatePayrollBatch(id, {
       payroll_period_id: periodId,
       office_id: officeId,
       bank_account_id: bankAccountId,
-      description: desc,
     })
 
     if (error) {

@@ -3,7 +3,6 @@ export interface PayrollAdaFormErrors {
   bank_account_id: string
   ada_date: string
   status: string
-  compensation_type: string
 }
 
 export function validatePayrollAdaForm(
@@ -11,14 +10,12 @@ export function validatePayrollAdaForm(
   bank_account_id: number | null,
   ada_date: string,
   status: string,
-  compensationType: string,
 ): { valid: boolean; errors: PayrollAdaFormErrors } {
   const errors: PayrollAdaFormErrors = {
     payroll_period_id: '',
     bank_account_id: '',
     ada_date: '',
     status: '',
-    compensation_type: '',
   }
   let valid = true
 
@@ -39,11 +36,6 @@ export function validatePayrollAdaForm(
 
   if (!status.trim()) {
     errors.status = 'Status is required.'
-    valid = false
-  }
-
-  if (!compensationType.trim()) {
-    errors.compensation_type = 'Compensation type is required.'
     valid = false
   }
 

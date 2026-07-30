@@ -21,14 +21,16 @@ export async function getAllPayrollBatches(): Promise<ServiceResponse<PayrollBat
 // ──── Get All With No ADA ─────────────────────────────────────────────────────
 export async function getPayrollBatchesWithNoAda(
   bankAccountId: number,
-): Promise<ServiceResponse<PayrollBatch[]>> {
+  payrollPeriodId: number,
+): Promise<ServiceResponse<PayrollBatchWithRelations[]>> {
   const { data, error } = await supabase
     .from('v_unassigned_payroll_batches')
     .select('*')
     .eq('bank_account_id', bankAccountId)
+    .eq('payroll_period_id', payrollPeriodId)
     .order('created_at', { ascending: false })
 
-  return { data: (data ?? []).map(mapPayrollBatch), error }
+  return { data: (data ?? []).map(mapPayrollBatchesWithRelations), error }
 }
 
 // ─── Get By ID ────────────────────────────────────────────────────────────────

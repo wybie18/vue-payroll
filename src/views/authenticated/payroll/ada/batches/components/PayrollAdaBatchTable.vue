@@ -49,9 +49,10 @@ const emit = defineEmits<{
 const sorting = ref<SortingState>([])
 const columnVisibility = useStorage<VisibilityState>(
   'payroll-ada-batch-table-column-visibility',
-  {},
+  {
+    description: false,
+  },
 )
-
 
 const pageCount = computed(() =>
   props.pageSize > 0 ? Math.ceil(props.totalCount / props.pageSize) : 0,

@@ -2,8 +2,9 @@ import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { PayrollAdaBatchWithRelations } from '@/types/payroll-ada-batch.types'
 import ColumnHeader from '@/components/ui/custom/data-table/ColumnHeader.vue'
-import { formatDate } from '@/helpers/date.helper'
+import { formatDate, formatDateRange } from '@/helpers/date.helper'
 import DataTableRowActions from './DataTableRowActions.vue'
+import { COMPENSATION_LABELS } from '@/helpers/constants.ts'
 
 export const payrollAdaBatchColumns: ColumnDef<PayrollAdaBatchWithRelations>[] = [
   {
@@ -29,8 +30,38 @@ export const payrollAdaBatchColumns: ColumnDef<PayrollAdaBatchWithRelations>[] =
     cell: ({ row }) => {
       const start = row.original.cutoff_start
       const end = row.original.cutoff_end
-      const displayText = start && end ? `${formatDate(start)} - ${formatDate(end)}` : 'N/A'
+      const displayText = start && end ? `${formatDateRange(start, end)}` : 'N/A'
       return h('div', { class: 'font-semibold text-muted-foreground' }, displayText)
+    },
+  },
+  {
+    accessorKey: 'compensation_type',
+    header: ({ column }) => h(ColumnHeader, { column, title: 'Type' }),
+    cell: ({ row }) => {
+      const type = row.getValue('compensation_type') as string | null
+      if (!type) return h('span', { class: 'text-muted-foreground' }, 'Unknown')
+      const label = COMPENSATION_LABELS[type] || type
+      return h(
+        'span',
+        {
+          class:
+            'inline-flex items-center rounded-md bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20',
+        },
+        label,
+      )
+    },
+  },
+  {
+    accessorKey: 'description',
+    header: ({ column }) => h(ColumnHeader, { column, title: 'Description' }),
+    meta: {
+      className: 'w-full',
+    },
+    cell: ({ row }) => {
+      const desc = row.getValue('description') as string | null
+      return desc
+        ? h('div', { class: 'truncate max-w-[250px]', title: desc }, desc)
+        : h('span', { class: 'text-muted-foreground' }, 'No description')
     },
   },
   {

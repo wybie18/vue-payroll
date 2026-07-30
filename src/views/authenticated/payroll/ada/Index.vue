@@ -55,9 +55,8 @@ async function handleSubmit(data: {
   bank_account_id: number
   ada_date: string
   status: string
-  compensation_type: PayrollAda['compensation_type']
 }) {
-  const { payroll_period_id, bank_account_id, ada_date, status, compensation_type } = data
+  const { payroll_period_id, bank_account_id, ada_date, status } = data
   if (selectedPayrollAda.value) {
     await editPayrollAda(
       selectedPayrollAda.value.ada_id,
@@ -65,10 +64,9 @@ async function handleSubmit(data: {
       bank_account_id,
       ada_date,
       status,
-      compensation_type,
     )
   } else {
-    await addPayrollAda(payroll_period_id, bank_account_id, ada_date, status, compensation_type)
+    await addPayrollAda(payroll_period_id, bank_account_id, ada_date, status)
   }
 }
 
@@ -83,6 +81,7 @@ function handleShowBatches(ada: PayrollAdaWithDetails) {
       ada_number: ada.ada_number,
       ada_id: ada.ada_id,
       bank_account_id: ada.bank_account_id,
+      payroll_period_id: ada.payroll_period_id,
     },
   })
 }

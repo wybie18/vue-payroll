@@ -1,0 +1,5 @@
+allowBuilds:
+  maplibre-gl: true
+  vue-demi: true
+minimumReleaseAgeExclude:
+  - '@lucide/vue@1.28.0'

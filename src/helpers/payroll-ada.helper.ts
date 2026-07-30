@@ -8,7 +8,6 @@ export function mapPayrollAda(row: any): PayrollAda {
     ada_number: row.ada_number,
     ada_date: row.ada_date,
     status: row.status,
-    compensation_type: row.compensation_type,
     created_at: row.created_at ?? null,
     updated_at: row.updated_at ?? null,
   }
@@ -17,6 +16,8 @@ export function mapPayrollAda(row: any): PayrollAda {
 export function mapPayrollAdaWithDetails(row: any): PayrollAdaWithDetails {
   return {
     ...mapPayrollAda(row),
+    compensation_type: row.compensation_type ?? null,
+    description: row.description ?? null,
     total_batches: row.total_batches ?? 0,
     total_net_pay: row.total_net_pay ?? 0,
     period: row.period

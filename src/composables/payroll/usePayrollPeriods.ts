@@ -5,7 +5,7 @@ import {
   updatePayrollPeriod,
   deletePayrollPeriod,
 } from '@/services/payroll-period.service'
-import type { PayrollPeriod } from '@/types/payroll-period.types'
+import type { PayrollPeriod, CompensationType } from '@/types/payroll-period.types'
 import { toast } from 'vue-sonner'
 
 export function usePayrollPeriods() {
@@ -15,6 +15,8 @@ export function usePayrollPeriods() {
   
   const startDate = ref<string | null>(null)
   const endDate = ref<string | null>(null)
+  const compensationTypeFilter = ref<CompensationType | null>(null)
+  const searchQuery = ref<string>('')
   
   const page = ref(1)
   const pageSize = ref(10)
@@ -27,6 +29,8 @@ export function usePayrollPeriods() {
       pageSize: pageSize.value,
       startDate: startDate.value,
       endDate: endDate.value,
+      compensation_type: compensationTypeFilter.value,
+      search: searchQuery.value,
     })
 
     if (error) {
@@ -46,7 +50,7 @@ export function usePayrollPeriods() {
   watch([page, pageSize], fetchPayrollPeriods)
 
   // When filters change, reset to page 1 (if not already 1)
-  watch([startDate, endDate], () => {
+  watch([startDate, endDate, compensationTypeFilter, searchQuery], () => {
     if (page.value === 1) {
       fetchPayrollPeriods()
     } else {
@@ -57,8 +61,18 @@ export function usePayrollPeriods() {
   // Initial fetch
   fetchPayrollPeriods()
 
-  async function addPayrollPeriod(cutoff_start: string, cutoff_end: string) {
-    const { error } = await createPayrollPeriod({ cutoff_start, cutoff_end })
+  async function addPayrollPeriod(
+    cutoff_start: string,
+    cutoff_end: string,
+    description?: string | null,
+    compensation_type?: CompensationType | null,
+  ) {
+    const { error } = await createPayrollPeriod({
+      cutoff_start,
+      cutoff_end,
+      description: description ?? null,
+      compensation_type: compensation_type ?? null,
+    })
 
     if (error) {
       console.error('[usePayrollPeriods] create:', error.message)
@@ -71,8 +85,19 @@ export function usePayrollPeriods() {
     }
   }
 
-  async function editPayrollPeriod(id: number, cutoff_start: string, cutoff_end: string) {
-    const { error } = await updatePayrollPeriod(id, { cutoff_start, cutoff_end })
+  async function editPayrollPeriod(
+    id: number,
+    cutoff_start: string,
+    cutoff_end: string,
+    description?: string | null,
+    compensation_type?: CompensationType | null,
+  ) {
+    const { error } = await updatePayrollPeriod(id, {
+      cutoff_start,
+      cutoff_end,
+      description: description ?? null,
+      compensation_type: compensation_type ?? null,
+    })
     if (error) {
       console.error('[usePayrollPeriods] update:', error.message)
       toast.error('Something went wrong!', {
@@ -103,6 +128,8 @@ export function usePayrollPeriods() {
     isLoading,
     startDate,
     endDate,
+    compensationTypeFilter,
+    searchQuery,
     page,
     pageSize,
     addPayrollPeriod,
