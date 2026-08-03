@@ -1,6 +1,6 @@
 import { ref, type Ref } from 'vue'
 import { getAdaDetails } from '@/services/payroll-ada-batch.service'
-import { formatCurrency, formatAccountNo, formatName } from '@/helpers/format.helper'
+import { formatCurrency, formatAccountNo, formatNameForCsv } from '@/helpers/format.helper'
 import { toast } from 'vue-sonner'
 
 // ─── CSV builder ──────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ export function useAdaCsvExport(adaId: Ref<number | null>, adaNumber: Ref<string
     const rows: (string | number)[][] = [
       ...data.employees.map((emp) => [
         formatAccountNo(emp.account_no),
-        formatName(emp.name),
+        formatNameForCsv(emp.name),
         formatCurrency(emp.net_pay).replace(/[,.]/g, ''),
       ]),
     ]
